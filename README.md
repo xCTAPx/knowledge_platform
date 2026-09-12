@@ -3,7 +3,7 @@
 Base project structure for a knowledge platform.
 
 - Backend: FastAPI (Python)
-- Frontend: React (JavaScript, Vite)
+- Frontend: React (TypeScript, Vite)
 
 There is no business logic yet — only the skeleton needed to run both apps.
 
