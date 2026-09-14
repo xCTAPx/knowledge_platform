@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     api_prefix: str = "/api/v1"
     frontend_origin: str = "http://localhost:5173"
+    database_url: str = "postgresql+psycopg://postgres:YOUR_PASSWORD@localhost:5432/knowledge_platform"
 
 
 settings = Settings()
