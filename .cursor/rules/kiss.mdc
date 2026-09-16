@@ -1,0 +1,9 @@
+---
+description: Simple & compact code
+globs: "**/*"
+alwaysApply: true
+---
+
+- Write with as minimum code amount as possible.
+- Write code as simple as possible.
+- Don't write any tests without requirements.
