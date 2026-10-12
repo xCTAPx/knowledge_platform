@@ -82,7 +82,7 @@ def end_session(request: Request, response: Response, db: Session) -> None:
     clear_session_cookies(response)
 
 
-def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
+def require_auth(request: Request, db: Session = Depends(get_db)) -> User:
     token = request.cookies.get("access_token")
     if not token:
         raise HTTPException(401, "Not authenticated")

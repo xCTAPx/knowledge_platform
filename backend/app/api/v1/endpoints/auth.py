@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import (
     end_session,
-    get_current_user,
+    require_auth,
     hash_password,
     rotate_session,
     start_session,
@@ -72,5 +72,5 @@ def logout(request: Request, response: Response, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=UserOut)
-def me(user: User = Depends(get_current_user)):
+def me(user: User = Depends(require_auth)):
     return user

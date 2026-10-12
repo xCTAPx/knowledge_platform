@@ -36,6 +36,22 @@ a:hover {
   padding: 72px 24px 48px;
 }
 
+.shell.wide {
+  max-width: 720px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.topbar .brand {
+  margin-bottom: 0;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -113,7 +129,8 @@ h1 {
   color: #6b6258;
 }
 
-.auth-form input {
+.auth-form input,
+.auth-form textarea {
   width: 100%;
   padding: 12px 14px;
   border: 1px solid #e0d4c2;
@@ -123,7 +140,13 @@ h1 {
   font: inherit;
 }
 
-.auth-form input:focus {
+.auth-form textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.auth-form input:focus,
+.auth-form textarea:focus {
   outline: 2px solid #243c32;
   outline-offset: 1px;
 }
@@ -159,6 +182,47 @@ a.button:hover {
 .muted {
   margin: 0;
   color: #6b6258;
+}
+
+.notes {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.note {
+  padding: 20px;
+  border: 1px solid #e0d4c2;
+  border-radius: 16px;
+  background: #faf6ee;
+}
+
+.note h2 {
+  margin: 0 0 8px;
+  font-family: Fraunces, Georgia, serif;
+  font-size: 1.25rem;
+}
+
+.note p {
+  margin: 0;
+  color: #6b6258;
+  white-space: pre-wrap;
+}
+
+.note .tags {
+  margin-bottom: 8px;
+  color: #9a4a2a;
+  font-size: 0.88rem;
+}
+
+.note .actions {
+  margin-top: 12px;
+}
+
+.card h1 {
+  font-size: 1.6rem;
 }
 
 .error {

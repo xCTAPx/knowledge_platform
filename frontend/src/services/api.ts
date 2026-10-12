@@ -32,8 +32,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return parse<T>(res);
 }
 
-function withBody(method: string, path: string, body?: unknown) {
-  return request(path, {
+function withBody<T>(method: string, path: string, body?: unknown) {
+  return request<T>(path, {
     method,
     body: body === undefined ? undefined : JSON.stringify(body),
   });
@@ -43,14 +43,14 @@ export const Api = {
   get<T>(path: string) {
     return request<T>(path);
   },
-  post(path: string, body?: unknown) {
-    return withBody("POST", path, body);
+  post<T = void>(path: string, body?: unknown) {
+    return withBody<T>("POST", path, body);
   },
-  put(path: string, body?: unknown) {
-    return withBody("PUT", path, body);
+  put<T = void>(path: string, body?: unknown) {
+    return withBody<T>("PUT", path, body);
   },
-  patch(path: string, body?: unknown) {
-    return withBody("PATCH", path, body);
+  patch<T = void>(path: string, body?: unknown) {
+    return withBody<T>("PATCH", path, body);
   },
   delete(path: string) {
     return request(path, { method: "DELETE" });
@@ -66,3 +66,20 @@ export const register = (nickname: string, email: string, password: string, age:
   Api.post("/auth/register", { nickname, email, password, age });
 
 export const logout = () => Api.post("/auth/logout");
+
+export type Note = {
+  id: number;
+  title: string;
+  content: string;
+  tags: string[];
+};
+
+export const listNotes = () => Api.get<Note[]>("/notes");
+
+export const createNote = (title: string, tags: string[], content: string) =>
+  Api.post<Note>("/notes", { title, tags, content });
+
+export const updateNote = (id: number, title: string, tags: string[], content: string) =>
+  Api.put<Note>(`/notes/${id}`, { title, tags, content });
+
+export const deleteNote = (id: number) => Api.delete(`/notes/${id}`);
