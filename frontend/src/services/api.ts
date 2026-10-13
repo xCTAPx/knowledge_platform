@@ -10,7 +10,7 @@ export type User = {
 
 async function send(path: string, options: RequestInit = {}) {
   const headers = new Headers(options.headers);
-  if (options.body) headers.set("Content-Type", "application/json");
+  if (options.body && !(options.body instanceof FormData)) headers.set("Content-Type", "application/json");
   return fetch(BASE + path, { ...options, headers, credentials: "include" });
 }
 
@@ -67,11 +67,17 @@ export const register = (nickname: string, email: string, password: string, age:
 
 export const logout = () => Api.post("/auth/logout");
 
+export type NoteFile = {
+  id: number;
+  name: string;
+};
+
 export type Note = {
   id: number;
   title: string;
   content: string;
   tags: string[];
+  files: NoteFile[];
 };
 
 export const listNotes = () => Api.get<Note[]>("/notes");
@@ -83,3 +89,36 @@ export const updateNote = (id: number, title: string, tags: string[], content: s
   Api.put<Note>(`/notes/${id}`, { title, tags, content });
 
 export const deleteNote = (id: number) => Api.delete(`/notes/${id}`);
+
+export const noteFileUrl = (noteId: number, fileId: number) => `${BASE}/notes/${noteId}/files/${fileId}`;
+
+export function uploadNoteFile(noteId: number, file: File, onProgress?: (pct: number) => void) {
+  const body = new FormData();
+  body.append("file", file);
+  const path = `/notes/${noteId}/files`;
+
+  function sendXhr() {
+    return new Promise<Response>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", BASE + path);
+      xhr.withCredentials = true;
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) onProgress?.(Math.round((event.loaded / event.total) * 100));
+      };
+      xhr.onload = () => resolve(new Response(xhr.responseText, { status: xhr.status }));
+      xhr.onerror = () => reject(new Error("Request failed"));
+      xhr.send(body);
+    });
+  }
+
+  return (async () => {
+    let res = await sendXhr();
+    if (res.status === 401) {
+      const refreshed = await send("/auth/refresh", { method: "POST" });
+      if (refreshed.ok) res = await sendXhr();
+    }
+    return parse<NoteFile>(res);
+  })();
+}
+
+export const deleteNoteFile = (noteId: number, fileId: number) => Api.delete(`/notes/${noteId}/files/${fileId}`);

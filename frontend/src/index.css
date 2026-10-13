@@ -156,6 +156,7 @@ a.button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -165,6 +166,11 @@ a.button {
   background: #243c32;
   color: #f4efe6;
   text-decoration: none;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: wait;
 }
 
 button.ghost,
@@ -219,6 +225,67 @@ a.button:hover {
 
 .note .actions {
   margin-top: 12px;
+}
+
+.files {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.files li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #e0d4c2;
+  border-radius: 12px;
+  background: #fffdf8;
+  font-size: 0.92rem;
+}
+
+.files a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.files button {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+}
+
+.upload-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #eef3ee;
+  color: #243c32;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 2px solid #c5d0c4;
+  border-top-color: #243c32;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .card h1 {
