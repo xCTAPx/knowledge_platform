@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Brand } from "../components/Brand";
 import { login } from "../services/api";
 
 export default function LoginPage() {
@@ -19,10 +20,7 @@ export default function LoginPage() {
 
   return (
     <main className="shell">
-      <Link to="/" className="brand">
-        <span className="mark">K</span>
-        <span className="brand-name">Knowledge</span>
-      </Link>
+      <Brand to="/" />
       <section className="card">
         <h1>Welcome back</h1>
         <p className="lede">Sign in to open your library.</p>

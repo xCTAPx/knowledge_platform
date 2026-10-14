@@ -92,10 +92,11 @@ export const deleteNote = (id: number) => Api.delete(`/notes/${id}`);
 
 export const noteFileUrl = (noteId: number, fileId: number) => `${BASE}/notes/${noteId}/files/${fileId}`;
 
-export function uploadNoteFile(noteId: number, file: File, onProgress?: (pct: number) => void) {
+export const fileUrl = (fileId: number) => `${BASE}/files/${fileId}`;
+
+function uploadForm(path: string, file: File, onProgress?: (pct: number) => void) {
   const body = new FormData();
   body.append("file", file);
-  const path = `/notes/${noteId}/files`;
 
   function sendXhr() {
     return new Promise<Response>((resolve, reject) => {
@@ -121,4 +122,13 @@ export function uploadNoteFile(noteId: number, file: File, onProgress?: (pct: nu
   })();
 }
 
+export const uploadNoteFile = (noteId: number, file: File, onProgress?: (pct: number) => void) =>
+  uploadForm(`/notes/${noteId}/files`, file, onProgress);
+
 export const deleteNoteFile = (noteId: number, fileId: number) => Api.delete(`/notes/${noteId}/files/${fileId}`);
+
+export const listFiles = () => Api.get<NoteFile[]>("/files");
+
+export const uploadFile = (file: File, onProgress?: (pct: number) => void) => uploadForm("/files", file, onProgress);
+
+export const deleteFile = (fileId: number) => Api.delete(`/files/${fileId}`);

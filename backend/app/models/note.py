@@ -20,6 +20,7 @@ class NoteFile(Base):
     __tablename__ = "note_files"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    note_id: Mapped[int] = mapped_column(ForeignKey("notes.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    note_id: Mapped[int | None] = mapped_column(ForeignKey("notes.id", ondelete="CASCADE"), index=True, nullable=True)
     name: Mapped[str] = mapped_column(String(255))
     stored: Mapped[str] = mapped_column(String(80), unique=True)

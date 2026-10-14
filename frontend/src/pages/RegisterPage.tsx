@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Brand } from "../components/Brand";
 import { register } from "../services/api";
 
 export default function RegisterPage() {
@@ -25,10 +26,7 @@ export default function RegisterPage() {
 
   return (
     <main className="shell">
-      <Link to="/" className="brand">
-        <span className="mark">K</span>
-        <span className="brand-name">Knowledge</span>
-      </Link>
+      <Brand to="/" />
       <section className="card">
         <h1>Create your library</h1>
         <p className="lede">A few details and you can start collecting knowledge.</p>
