@@ -1,7 +1,7 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { FeedList } from "../components/FeedList";
 import { LibraryCard } from "../components/LibraryCard";
 import { NoteForm } from "../components/NoteForm";
-import { NoteList } from "../components/NoteList";
 import { Topbar } from "../components/Topbar";
 import { errMsg, keepBusy, tagsFrom } from "../lib/files";
 import {
@@ -10,22 +10,27 @@ import {
   deleteNote,
   deleteNoteFile,
   getMe,
-  listFiles,
-  listNotes,
+  listFeed,
   logout,
   updateNote,
   uploadFile,
   uploadNoteFile,
+  type FeedItem,
   type Note,
-  type NoteFile,
   type User,
 } from "../services/api";
 import { Landing } from "./Landing";
 
+function cursor(items: FeedItem[]) {
+  const last = items[items.length - 1];
+  if (!last) return undefined;
+  return { before_id: last.id, before_kind: last.kind, before_created_at: last.created_at };
+}
+
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [library, setLibrary] = useState<NoteFile[]>([]);
+  const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [hasMore, setHasMore] = useState(false);
   const [editing, setEditing] = useState<Note | null>(null);
   const [pending, setPending] = useState<File[]>([]);
   const [loose, setLoose] = useState<File[]>([]);
@@ -33,14 +38,41 @@ export default function HomePage() {
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
   const [fileError, setFileError] = useState("");
+  const feedRef = useRef(feed);
+  const hasMoreRef = useRef(hasMore);
+  const loadingRef = useRef(false);
+  feedRef.current = feed;
+  hasMoreRef.current = hasMore;
+
+  const loadMore = useCallback(async () => {
+    if (loadingRef.current || !hasMoreRef.current) return;
+    loadingRef.current = true;
+    try {
+      const page = await listFeed(cursor(feedRef.current));
+      setFeed((prev) => {
+        const seen = new Set(prev.map((item) => `${item.kind}:${item.id}`));
+        return [...prev, ...page.items.filter((item) => !seen.has(`${item.kind}:${item.id}`))];
+      });
+      setHasMore(page.has_more);
+    } catch {
+      setHasMore(false);
+    } finally {
+      loadingRef.current = false;
+    }
+  }, []);
 
   useEffect(() => {
     getMe()
       .then(async (me) => {
-        setUser(me);
-        const [noteRows, fileRows] = await Promise.all([listNotes(), listFiles()]);
-        setNotes(noteRows);
-        setLibrary(fileRows);
+        loadingRef.current = true;
+        try {
+          const page = await listFeed();
+          setFeed(page.items);
+          setHasMore(page.has_more);
+        } finally {
+          loadingRef.current = false;
+          setUser(me);
+        }
       })
       .catch(() => setUser(null));
   }, []);
@@ -48,8 +80,8 @@ export default function HomePage() {
   async function onLogout() {
     await logout().catch(() => undefined);
     setUser(null);
-    setNotes([]);
-    setLibrary([]);
+    setFeed([]);
+    setHasMore(false);
   }
 
   async function onSaveNote(event: FormEvent<HTMLFormElement>) {
@@ -75,7 +107,8 @@ export default function HomePage() {
         );
       }
       note = { ...note, files };
-      setNotes(editing ? notes.map((item) => (item.id === note.id ? note : item)) : [note, ...notes]);
+      const item: FeedItem = { kind: "note", ...note };
+      setFeed(editing ? feed.map((row) => (row.kind === "note" && row.id === note.id ? item : row)) : [item, ...feed]);
       setEditing(null);
       setPending([]);
       form.reset();
@@ -97,17 +130,18 @@ export default function HomePage() {
     setProgress("Uploading files…");
     const started = Date.now();
     try {
-      const uploaded: NoteFile[] = [];
+      const uploaded: FeedItem[] = [];
       let i = 0;
       for (const file of loose) {
         i += 1;
-        uploaded.push(
-          await uploadFile(file, (pct) => {
+        uploaded.push({
+          kind: "file",
+          ...(await uploadFile(file, (pct) => {
             setProgress(`Uploading ${file.name} (${i}/${loose.length}) ${pct}%`);
-          }),
-        );
+          })),
+        });
       }
-      setLibrary([...uploaded, ...library]);
+      setFeed([...uploaded, ...feed]);
       setLoose([]);
       form.reset();
     } catch (err) {
@@ -121,7 +155,7 @@ export default function HomePage() {
 
   async function onDeleteNote(id: number) {
     await deleteNote(id);
-    setNotes(notes.filter((note) => note.id !== id));
+    setFeed(feed.filter((item) => !(item.kind === "note" && item.id === id)));
     if (editing?.id === id) {
       setEditing(null);
       setPending([]);
@@ -149,7 +183,6 @@ export default function HomePage() {
         }}
       />
       <LibraryCard
-        library={library}
         loose={loose}
         busy={busy === "files"}
         locked={!!busy}
@@ -158,22 +191,26 @@ export default function HomePage() {
         onSubmit={onSaveFiles}
         onPick={(files) => setLoose([...loose, ...files])}
         onRemoveLoose={(index) => setLoose(loose.filter((_, i) => i !== index))}
-        onDelete={async (id) => {
-          await deleteFile(id);
-          setLibrary(library.filter((item) => item.id !== id));
-        }}
       />
-      <NoteList
-        notes={notes}
+      <FeedList
+        items={feed}
+        hasMore={hasMore}
+        onLoadMore={loadMore}
         onEdit={setEditing}
-        onDelete={onDeleteNote}
+        onDeleteNote={onDeleteNote}
         onRemoveFile={async (noteId, fileId) => {
           await deleteNoteFile(noteId, fileId);
-          setNotes(
-            notes.map((note) =>
-              note.id === noteId ? { ...note, files: note.files.filter((file) => file.id !== fileId) } : note,
+          setFeed(
+            feed.map((item) =>
+              item.kind === "note" && item.id === noteId
+                ? { ...item, files: item.files.filter((file) => file.id !== fileId) }
+                : item,
             ),
           );
+        }}
+        onDeleteFile={async (id) => {
+          await deleteFile(id);
+          setFeed(feed.filter((item) => !(item.kind === "file" && item.id === id)));
         }}
       />
     </main>

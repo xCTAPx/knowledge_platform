@@ -1,12 +1,9 @@
 import { FormEvent } from "react";
-import { fileUrl, type NoteFile } from "../services/api";
 import { FilePicker } from "./FilePicker";
 import { PendingFiles } from "./PendingFiles";
-import { StoredFiles } from "./StoredFiles";
 import { UploadStatus } from "./UploadStatus";
 
 export function LibraryCard({
-  library,
   loose,
   busy,
   locked,
@@ -15,9 +12,7 @@ export function LibraryCard({
   onSubmit,
   onPick,
   onRemoveLoose,
-  onDelete,
 }: {
-  library: NoteFile[];
   loose: File[];
   busy: boolean;
   locked: boolean;
@@ -26,7 +21,6 @@ export function LibraryCard({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onPick: (files: File[]) => void;
   onRemoveLoose: (index: number) => void;
-  onDelete: (id: number) => void;
 }) {
   return (
     <section className="card">
@@ -43,7 +37,6 @@ export function LibraryCard({
           </button>
         </div>
       </form>
-      <StoredFiles files={library} href={fileUrl} action="Delete" onAction={onDelete} />
     </section>
   );
 }

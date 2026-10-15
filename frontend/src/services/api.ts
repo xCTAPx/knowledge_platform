@@ -67,9 +67,10 @@ export const register = (nickname: string, email: string, password: string, age:
 
 export const logout = () => Api.post("/auth/logout");
 
-export type NoteFile = {
+export type FileOut = {
   id: number;
   name: string;
+  created_at: string;
 };
 
 export type Note = {
@@ -77,10 +78,36 @@ export type Note = {
   title: string;
   content: string;
   tags: string[];
-  files: NoteFile[];
+  created_at: string;
+  files: FileOut[];
 };
 
-export const listNotes = () => Api.get<Note[]>("/notes");
+export type FeedItem = (Note & { kind: "note" }) | (FileOut & { kind: "file" });
+
+export type Page<T> = {
+  items: T[];
+  has_more: boolean;
+};
+
+export type FeedCursor = {
+  before_id: number;
+  before_kind: "note" | "file";
+  before_created_at: string;
+};
+
+export const PAGE_SIZE = 20;
+
+function qs(params: Record<string, string | number | undefined>) {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) search.set(key, String(value));
+  }
+  const value = search.toString();
+  return value ? `?${value}` : "";
+}
+
+export const listNotes = (before_id?: number, limit = PAGE_SIZE) =>
+  Api.get<Page<Note>>(`/notes${qs({ limit, before_id })}`);
 
 export const createNote = (title: string, tags: string[], content: string) =>
   Api.post<Note>("/notes", { title, tags, content });
@@ -118,7 +145,7 @@ function uploadForm(path: string, file: File, onProgress?: (pct: number) => void
       const refreshed = await send("/auth/refresh", { method: "POST" });
       if (refreshed.ok) res = await sendXhr();
     }
-    return parse<NoteFile>(res);
+    return parse<FileOut>(res);
   })();
 }
 
@@ -127,7 +154,11 @@ export const uploadNoteFile = (noteId: number, file: File, onProgress?: (pct: nu
 
 export const deleteNoteFile = (noteId: number, fileId: number) => Api.delete(`/notes/${noteId}/files/${fileId}`);
 
-export const listFiles = () => Api.get<NoteFile[]>("/files");
+export const listFiles = (before_id?: number, limit = PAGE_SIZE) =>
+  Api.get<Page<FileOut>>(`/files${qs({ limit, before_id })}`);
+
+export const listFeed = (cursor?: FeedCursor, limit = PAGE_SIZE) =>
+  Api.get<Page<FeedItem>>(`/feed${qs({ limit, ...cursor })}`);
 
 export const uploadFile = (file: File, onProgress?: (pct: number) => void) => uploadForm("/files", file, onProgress);
 

@@ -1,6 +1,13 @@
 export const FILE_ACCEPT = ".pdf,.txt,.md,application/pdf,text/plain,text/markdown";
 export const FILE_OK = /\.(pdf|txt|md)$/i;
 
+export function fileKind(name: string) {
+  const ext = name.split(".").pop()?.toLowerCase();
+  if (ext === "pdf") return "PDF";
+  if (ext === "md") return "Markdown";
+  return "Text";
+}
+
 export function pickFiles(list: FileList | null) {
   return Array.from(list ?? []).filter((file) => FILE_OK.test(file.name));
 }

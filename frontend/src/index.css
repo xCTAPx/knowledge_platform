@@ -198,25 +198,60 @@ a.button:hover {
   color: #6b6258;
 }
 
-.notes {
-  list-style: none;
+.tape {
   margin: 24px 0 0;
-  padding: 0;
-  display: grid;
-  gap: 12px;
 }
 
-.note {
+.tape-empty {
+  margin: 24px 0 0;
+}
+
+.tape-space {
+  position: relative;
+  width: 100%;
+}
+
+.tape-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding-bottom: 14px;
+}
+
+.note,
+.file-card {
   padding: 20px;
   border: 1px solid #e0d4c2;
   border-radius: 16px;
   background: #faf6ee;
 }
 
-.note h2 {
+.file-card {
+  padding: 28px 24px;
+  min-height: 140px;
+  border-left: 6px solid #9a4a2a;
+}
+
+.file-card .file-type {
+  margin: 0 0 8px;
+  color: #9a4a2a;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.note h2,
+.file-card h2 {
   margin: 0 0 8px;
   font-family: Fraunces, Georgia, serif;
   font-size: 1.25rem;
+}
+
+.file-card h2 {
+  font-size: 1.55rem;
+  word-break: break-word;
 }
 
 .note p {
@@ -231,8 +266,9 @@ a.button:hover {
   font-size: 0.88rem;
 }
 
-.note .actions {
-  margin-top: 12px;
+.note .actions,
+.file-card .actions {
+  margin-top: 16px;
 }
 
 .files {
@@ -248,11 +284,12 @@ a.button:hover {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 8px 12px;
+  min-height: 52px;
+  padding: 14px 16px;
   border: 1px solid #e0d4c2;
   border-radius: 12px;
   background: #fffdf8;
-  font-size: 0.92rem;
+  font-size: 1rem;
 }
 
 .files a {
