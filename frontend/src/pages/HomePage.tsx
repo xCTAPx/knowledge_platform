@@ -38,50 +38,80 @@ export default function HomePage() {
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
   const [fileError, setFileError] = useState("");
+  const [query, setQuery] = useState("");
+  const [q, setQ] = useState("");
+  const [ready, setReady] = useState(false);
   const feedRef = useRef(feed);
   const hasMoreRef = useRef(hasMore);
+  const qRef = useRef(q);
   const loadingRef = useRef(false);
+  const genRef = useRef(0);
   feedRef.current = feed;
   hasMoreRef.current = hasMore;
+  qRef.current = q;
+
+  const reloadFirstPage = useCallback(async () => {
+    const gen = ++genRef.current;
+    loadingRef.current = true;
+    try {
+      const page = await listFeed(undefined, undefined, qRef.current || undefined);
+      if (gen !== genRef.current) return;
+      setFeed(page.items);
+      setHasMore(page.has_more);
+      setReady(true);
+    } catch {
+      if (gen === genRef.current) {
+        setFeed([]);
+        setHasMore(false);
+      }
+    } finally {
+      if (gen === genRef.current) loadingRef.current = false;
+    }
+  }, []);
 
   const loadMore = useCallback(async () => {
     if (loadingRef.current || !hasMoreRef.current) return;
+    const gen = genRef.current;
     loadingRef.current = true;
     try {
-      const page = await listFeed(cursor(feedRef.current));
+      const page = await listFeed(cursor(feedRef.current), undefined, qRef.current || undefined);
+      if (gen !== genRef.current) return;
       setFeed((prev) => {
         const seen = new Set(prev.map((item) => `${item.kind}:${item.id}`));
         return [...prev, ...page.items.filter((item) => !seen.has(`${item.kind}:${item.id}`))];
       });
       setHasMore(page.has_more);
     } catch {
-      setHasMore(false);
+      if (gen === genRef.current) setHasMore(false);
     } finally {
-      loadingRef.current = false;
+      if (gen === genRef.current) loadingRef.current = false;
     }
   }, []);
 
   useEffect(() => {
+    const timer = window.setTimeout(() => setQ(query.trim()), 300);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+
+  useEffect(() => {
     getMe()
-      .then(async (me) => {
-        loadingRef.current = true;
-        try {
-          const page = await listFeed();
-          setFeed(page.items);
-          setHasMore(page.has_more);
-        } finally {
-          loadingRef.current = false;
-          setUser(me);
-        }
-      })
+      .then(setUser)
       .catch(() => setUser(null));
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    void reloadFirstPage();
+  }, [user, q, reloadFirstPage]);
 
   async function onLogout() {
     await logout().catch(() => undefined);
     setUser(null);
     setFeed([]);
     setHasMore(false);
+    setReady(false);
+    setQuery("");
+    setQ("");
   }
 
   async function onSaveNote(event: FormEvent<HTMLFormElement>) {
@@ -107,8 +137,11 @@ export default function HomePage() {
         );
       }
       note = { ...note, files };
-      const item: FeedItem = { kind: "note", ...note };
-      setFeed(editing ? feed.map((row) => (row.kind === "note" && row.id === note.id ? item : row)) : [item, ...feed]);
+      if (qRef.current) await reloadFirstPage();
+      else {
+        const item: FeedItem = { kind: "note", ...note };
+        setFeed(editing ? feed.map((row) => (row.kind === "note" && row.id === note.id ? item : row)) : [item, ...feed]);
+      }
       setEditing(null);
       setPending([]);
       form.reset();
@@ -141,7 +174,8 @@ export default function HomePage() {
           })),
         });
       }
-      setFeed([...uploaded, ...feed]);
+      if (qRef.current) await reloadFirstPage();
+      else setFeed([...uploaded, ...feed]);
       setLoose([]);
       form.reset();
     } catch (err) {
@@ -167,34 +201,47 @@ export default function HomePage() {
   return (
     <main className="shell wide">
       <Topbar nickname={user.nickname} onLogout={onLogout} />
-      <NoteForm
-        editing={editing}
-        pending={pending}
-        busy={busy === "note"}
-        locked={!!busy}
-        progress={progress}
-        error={error}
-        onSubmit={onSaveNote}
-        onPick={(files) => setPending([...pending, ...files])}
-        onRemovePending={(index) => setPending(pending.filter((_, i) => i !== index))}
-        onCancel={() => {
-          setEditing(null);
-          setPending([]);
-        }}
-      />
-      <LibraryCard
-        loose={loose}
-        busy={busy === "files"}
-        locked={!!busy}
-        progress={progress}
-        error={fileError}
-        onSubmit={onSaveFiles}
-        onPick={(files) => setLoose([...loose, ...files])}
-        onRemoveLoose={(index) => setLoose(loose.filter((_, i) => i !== index))}
-      />
+      <div className="compose">
+        <NoteForm
+          editing={editing}
+          pending={pending}
+          busy={busy === "note"}
+          locked={!!busy}
+          progress={progress}
+          error={error}
+          onSubmit={onSaveNote}
+          onPick={(files) => setPending([...pending, ...files])}
+          onRemovePending={(index) => setPending(pending.filter((_, i) => i !== index))}
+          onCancel={() => {
+            setEditing(null);
+            setPending([]);
+          }}
+        />
+        <LibraryCard
+          loose={loose}
+          busy={busy === "files"}
+          locked={!!busy}
+          progress={progress}
+          error={fileError}
+          onSubmit={onSaveFiles}
+          onPick={(files) => setLoose([...loose, ...files])}
+          onRemoveLoose={(index) => setLoose(loose.filter((_, i) => i !== index))}
+        />
+      </div>
+      <label className="search">
+        Search
+        <input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Name, note content, or attached file"
+        />
+      </label>
+      {ready ? (
       <FeedList
         items={feed}
         hasMore={hasMore}
+        empty={q ? "Nothing matches." : "No notes or files yet."}
+        q={q}
         onLoadMore={loadMore}
         onEdit={setEditing}
         onDeleteNote={onDeleteNote}
@@ -213,6 +260,7 @@ export default function HomePage() {
           setFeed(feed.filter((item) => !(item.kind === "file" && item.id === id)));
         }}
       />
+      ) : null}
     </main>
   );
 }

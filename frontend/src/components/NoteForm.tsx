@@ -47,7 +47,7 @@ export function NoteForm({
         </label>
         <label>
           Content
-          <textarea name="content" rows={6} defaultValue={editing?.content ?? ""} key={`content-${key}`} />
+          <textarea name="content" rows={4} defaultValue={editing?.content ?? ""} key={`content-${key}`} />
         </label>
         <FilePicker disabled={busy} onPick={onPick} />
         <PendingFiles files={pending} busy={busy} onRemove={onRemovePending} />

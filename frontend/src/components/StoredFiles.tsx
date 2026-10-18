@@ -1,10 +1,14 @@
+import { Hit } from "./Hit";
+
 export function StoredFiles({
   files,
+  q = "",
   href,
   action,
   onAction,
 }: {
   files: { id: number; name: string }[];
+  q?: string;
   href: (id: number) => string;
   action: string;
   onAction: (id: number) => void;
@@ -15,7 +19,7 @@ export function StoredFiles({
       {files.map((file) => (
         <li key={file.id}>
           <a href={href(file.id)} target="_blank" rel="noreferrer">
-            {file.name}
+            <Hit text={file.name} q={q} />
           </a>
           <button type="button" className="ghost" onClick={() => onAction(file.id)}>
             {action}

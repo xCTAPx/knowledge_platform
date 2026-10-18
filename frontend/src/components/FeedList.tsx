@@ -2,11 +2,14 @@ import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { fileKind } from "../lib/files";
 import { fileUrl, noteFileUrl, type FeedItem, type Note } from "../services/api";
+import { Hit } from "./Hit";
 import { StoredFiles } from "./StoredFiles";
 
 export function FeedList({
   items,
   hasMore,
+  empty,
+  q,
   onLoadMore,
   onEdit,
   onDeleteNote,
@@ -15,6 +18,8 @@ export function FeedList({
 }: {
   items: FeedItem[];
   hasMore: boolean;
+  empty: string;
+  q: string;
   onLoadMore: () => void;
   onEdit: (note: Note) => void;
   onDeleteNote: (id: number) => void;
@@ -40,7 +45,7 @@ export function FeedList({
     if (lastIndex >= items.length - 4) onLoadMore();
   }, [hasMore, items.length, lastIndex, onLoadMore]);
 
-  if (!items.length) return <p className="muted tape-empty">No notes or files yet.</p>;
+  if (!items.length) return <p className="muted tape-empty">{empty}</p>;
 
   return (
     <div ref={listRef} className="tape">
@@ -58,11 +63,18 @@ export function FeedList({
             >
               {item.kind === "note" ? (
                 <article className="note">
-                  <h2>{item.title}</h2>
+                  <h2>
+                    <Hit text={item.title} q={q} />
+                  </h2>
                   {item.tags.length ? <p className="tags">{item.tags.map((tag) => `#${tag}`).join(" ")}</p> : null}
-                  {item.content ? <p>{item.content}</p> : null}
+                  {item.content ? (
+                    <p>
+                      <Hit text={item.content} q={q} />
+                    </p>
+                  ) : null}
                   <StoredFiles
                     files={item.files}
+                    q={q}
                     href={(id) => noteFileUrl(item.id, id)}
                     action="Remove"
                     onAction={(id) => onRemoveFile(item.id, id)}
@@ -79,7 +91,9 @@ export function FeedList({
               ) : (
                 <article className="file-card">
                   <p className="file-type">{fileKind(item.name)}</p>
-                  <h2>{item.name}</h2>
+                  <h2>
+                    <Hit text={item.name} q={q} />
+                  </h2>
                   <div className="actions">
                     <a className="button ghost" href={fileUrl(item.id)} target="_blank" rel="noreferrer">
                       Open

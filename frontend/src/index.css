@@ -37,7 +37,37 @@ a:hover {
 }
 
 .shell.wide {
-  max-width: 720px;
+  max-width: 960px;
+}
+
+.compose {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.compose .card {
+  margin-top: 0;
+  padding: 20px;
+}
+
+.compose .card h1 {
+  font-size: 1.35rem;
+}
+
+.compose .lede {
+  margin-bottom: 0;
+  font-size: 0.95rem;
+}
+
+.compose .auth-form {
+  margin: 14px 0 0;
+  gap: 10px;
+}
+
+.compose .auth-form textarea {
+  min-height: 72px;
 }
 
 .topbar {
@@ -113,6 +143,10 @@ h1 {
 
 .card + .card {
   margin-top: 16px;
+}
+
+.compose .card + .card {
+  margin-top: 0;
 }
 
 .card .lede {
@@ -196,6 +230,38 @@ a.button:hover {
 .muted {
   margin: 0;
   color: #6b6258;
+}
+
+.search {
+  display: grid;
+  gap: 6px;
+  margin: 20px 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #6b6258;
+}
+
+.search input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e0d4c2;
+  border-radius: 12px;
+  background: #fffdf8;
+  color: inherit;
+  font: inherit;
+  font-weight: 400;
+}
+
+.search input:focus {
+  outline: 2px solid #243c32;
+  outline-offset: 1px;
+}
+
+mark.hit {
+  background: #ffe566;
+  color: inherit;
+  padding: 0 0.12em;
+  border-radius: 3px;
 }
 
 .tape {
@@ -341,6 +407,12 @@ a.button:hover {
   margin: 0;
   color: #9a2a2a;
   font-size: 0.92rem;
+}
+
+@media (max-width: 800px) {
+  .compose {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 600px) {

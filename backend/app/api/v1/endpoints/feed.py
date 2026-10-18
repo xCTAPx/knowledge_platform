@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends
 from pydantic import Field
-from sqlalchemy import literal, select, tuple_, union_all
+from sqlalchemy import exists, literal, or_, select, tuple_, union_all
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.v1.endpoints.files import FileOut
@@ -29,8 +29,14 @@ class FeedFile(FileOut):
 FeedItem = Annotated[FeedNote | FeedFile, Field(discriminator="kind")]
 
 
+def _contains(column, term: str):
+    pattern = "%" + term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
+    return column.ilike(pattern, escape="\\")
+
+
 @router.get("/feed", response_model=Page[FeedItem])
 def list_feed(
+    q: str | None = None,
     before_id: int | None = None,
     before_kind: Literal["note", "file"] | None = None,
     before_created_at: datetime | None = None,
@@ -42,6 +48,11 @@ def list_feed(
     files_q = select(literal("file").label("kind"), File.id, File.created_at).where(
         File.user_id == user.id, File.note_id.is_(None)
     )
+    term = (q or "").strip()
+    if term:
+        attached = exists().where(File.note_id == Note.id, _contains(File.name, term))
+        notes_q = notes_q.where(or_(_contains(Note.title, term), _contains(Note.content, term), attached))
+        files_q = files_q.where(_contains(File.name, term))
     feed = union_all(notes_q, files_q).subquery("feed")
     stmt = select(feed.c.kind, feed.c.id, feed.c.created_at).order_by(
         feed.c.created_at.desc(), feed.c.kind.desc(), feed.c.id.desc()

@@ -157,8 +157,8 @@ export const deleteNoteFile = (noteId: number, fileId: number) => Api.delete(`/n
 export const listFiles = (before_id?: number, limit = PAGE_SIZE) =>
   Api.get<Page<FileOut>>(`/files${qs({ limit, before_id })}`);
 
-export const listFeed = (cursor?: FeedCursor, limit = PAGE_SIZE) =>
-  Api.get<Page<FeedItem>>(`/feed${qs({ limit, ...cursor })}`);
+export const listFeed = (cursor?: FeedCursor, limit = PAGE_SIZE, q?: string) =>
+  Api.get<Page<FeedItem>>(`/feed${qs({ limit, q: q || undefined, ...cursor })}`);
 
 export const uploadFile = (file: File, onProgress?: (pct: number) => void) => uploadForm("/files", file, onProgress);
 

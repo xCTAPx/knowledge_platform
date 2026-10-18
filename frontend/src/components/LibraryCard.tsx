@@ -24,8 +24,8 @@ export function LibraryCard({
 }) {
   return (
     <section className="card">
-      <h1>Files</h1>
-      <p className="lede">Keep PDF, txt, and Markdown files here without a note.</p>
+      <h1>Add files</h1>
+      <p className="lede">PDF, txt, or Markdown without a note.</p>
       <form className="auth-form" onSubmit={onSubmit}>
         <FilePicker disabled={busy} onPick={onPick} />
         <PendingFiles files={loose} busy={busy} onRemove={onRemoveLoose} />
