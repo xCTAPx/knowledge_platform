@@ -252,9 +252,56 @@ a.button:hover {
   font-weight: 400;
 }
 
-.search input:focus {
+.search input:focus,
+.ask textarea:focus {
   outline: 2px solid #243c32;
   outline-offset: 1px;
+}
+
+.ask {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 10px;
+  align-items: end;
+  margin: 16px 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #6b6258;
+}
+
+.ask label {
+  display: grid;
+  gap: 8px;
+}
+
+.ask textarea {
+  min-width: 0;
+  min-height: 96px;
+  padding: 12px 14px;
+  border: 1px solid #e0d4c2;
+  border-radius: 16px;
+  background: #fffdf8;
+  color: inherit;
+  font: inherit;
+  font-weight: 400;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.ask .error,
+.ask .answer {
+  grid-column: 1 / -1;
+}
+
+.answer {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #fffdf8;
+  border: 1px solid #e0d4c2;
+  color: #1c1915;
+  font-weight: 400;
+  white-space: pre-wrap;
 }
 
 mark.hit {

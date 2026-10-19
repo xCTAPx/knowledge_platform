@@ -17,3 +17,8 @@ def page_limit(limit: int = Query(20, ge=1, le=100)) -> int:
 
 def sliced(rows: list[T], limit: int) -> tuple[list[T], bool]:
     return rows[:limit], len(rows) > limit
+
+
+def contains(column, term: str):
+    pattern = "%" + term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
+    return column.ilike(pattern, escape="\\")

@@ -1,4 +1,5 @@
 import { FormEvent } from "react";
+import { isolateSubmit } from "../lib/forms";
 import { FilePicker } from "./FilePicker";
 import { PendingFiles } from "./PendingFiles";
 import { UploadStatus } from "./UploadStatus";
@@ -26,7 +27,7 @@ export function LibraryCard({
     <section className="card">
       <h1>Add files</h1>
       <p className="lede">PDF, txt, or Markdown without a note.</p>
-      <form className="auth-form" onSubmit={onSubmit}>
+      <form className="auth-form" onSubmit={isolateSubmit(onSubmit)}>
         <FilePicker disabled={busy} onPick={onPick} />
         <PendingFiles files={loose} busy={busy} onRemove={onRemoveLoose} />
         {busy ? <UploadStatus text={progress} /> : null}

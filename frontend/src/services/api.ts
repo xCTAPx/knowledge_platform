@@ -163,3 +163,5 @@ export const listFeed = (cursor?: FeedCursor, limit = PAGE_SIZE, q?: string) =>
 export const uploadFile = (file: File, onProgress?: (pct: number) => void) => uploadForm("/files", file, onProgress);
 
 export const deleteFile = (fileId: number) => Api.delete(`/files/${fileId}`);
+
+export const askLibrary = (q: string) => Api.post<{ answer: string }>("/ask", { q });

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.api.v1.endpoints.files import FileOut
 from app.api.v1.endpoints.notes import NoteOut
-from app.api.v1.paging import Page, page_limit, sliced
+from app.api.v1.paging import Page, contains, page_limit, sliced
 from app.core.database import get_db
 from app.core.security import require_auth
 from app.models.file import File
@@ -29,11 +29,6 @@ class FeedFile(FileOut):
 FeedItem = Annotated[FeedNote | FeedFile, Field(discriminator="kind")]
 
 
-def _contains(column, term: str):
-    pattern = "%" + term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
-    return column.ilike(pattern, escape="\\")
-
-
 @router.get("/feed", response_model=Page[FeedItem])
 def list_feed(
     q: str | None = None,
@@ -50,9 +45,9 @@ def list_feed(
     )
     term = (q or "").strip()
     if term:
-        attached = exists().where(File.note_id == Note.id, _contains(File.name, term))
-        notes_q = notes_q.where(or_(_contains(Note.title, term), _contains(Note.content, term), attached))
-        files_q = files_q.where(_contains(File.name, term))
+        attached = exists().where(File.note_id == Note.id, contains(File.name, term))
+        notes_q = notes_q.where(or_(contains(Note.title, term), contains(Note.content, term), attached))
+        files_q = files_q.where(contains(File.name, term))
     feed = union_all(notes_q, files_q).subquery("feed")
     stmt = select(feed.c.kind, feed.c.id, feed.c.created_at).order_by(
         feed.c.created_at.desc(), feed.c.kind.desc(), feed.c.id.desc()

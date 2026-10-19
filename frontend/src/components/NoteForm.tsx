@@ -1,4 +1,5 @@
 import { FormEvent } from "react";
+import { isolateSubmit } from "../lib/forms";
 import { type Note } from "../services/api";
 import { FilePicker } from "./FilePicker";
 import { PendingFiles } from "./PendingFiles";
@@ -31,7 +32,7 @@ export function NoteForm({
   return (
     <section className="card">
       <h1>{editing ? "Edit note" : "New note"}</h1>
-      <form className="auth-form" onSubmit={onSubmit}>
+      <form className="auth-form" onSubmit={isolateSubmit(onSubmit)}>
         <label>
           Title
           <input name="title" required defaultValue={editing?.title ?? ""} key={`title-${key}`} />
