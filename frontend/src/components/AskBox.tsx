@@ -39,7 +39,7 @@ export function AskBox({
         {busy ? "Asking…" : "Ask"}
       </button>
       {error ? <p className="error">{error}</p> : null}
-      {answer ? <p className="answer">{answer}</p> : null}
+      {answer || busy ? <p className={busy ? "answer streaming" : "answer"}>{answer}</p> : null}
     </form>
   );
 }

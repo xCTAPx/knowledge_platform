@@ -14,6 +14,13 @@ async function send(path: string, options: RequestInit = {}) {
   return fetch(BASE + path, { ...options, headers, credentials: "include" });
 }
 
+async function withAuth(path: string, once: () => Promise<Response>) {
+  let res = await once();
+  if (res.status !== 401 || SKIP_REFRESH.has(path)) return res;
+  const refreshed = await send("/auth/refresh", { method: "POST" });
+  return refreshed.ok ? once() : res;
+}
+
 async function parse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const body = (await res.json().catch(() => null)) as { detail?: string } | null;
@@ -24,12 +31,7 @@ async function parse<T>(res: Response): Promise<T> {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  let res = await send(path, options);
-  if (res.status === 401 && !SKIP_REFRESH.has(path)) {
-    const refreshed = await send("/auth/refresh", { method: "POST" });
-    if (refreshed.ok) res = await send(path, options);
-  }
-  return parse<T>(res);
+  return parse<T>(await withAuth(path, () => send(path, options)));
 }
 
 function withBody<T>(method: string, path: string, body?: unknown) {
@@ -121,7 +123,7 @@ export const noteFileUrl = (noteId: number, fileId: number) => `${BASE}/notes/${
 
 export const fileUrl = (fileId: number) => `${BASE}/files/${fileId}`;
 
-function uploadForm(path: string, file: File, onProgress?: (pct: number) => void) {
+async function uploadForm(path: string, file: File, onProgress?: (pct: number) => void) {
   const body = new FormData();
   body.append("file", file);
 
@@ -139,14 +141,7 @@ function uploadForm(path: string, file: File, onProgress?: (pct: number) => void
     });
   }
 
-  return (async () => {
-    let res = await sendXhr();
-    if (res.status === 401) {
-      const refreshed = await send("/auth/refresh", { method: "POST" });
-      if (refreshed.ok) res = await sendXhr();
-    }
-    return parse<FileOut>(res);
-  })();
+  return parse<FileOut>(await withAuth(path, sendXhr));
 }
 
 export const uploadNoteFile = (noteId: number, file: File, onProgress?: (pct: number) => void) =>
@@ -164,4 +159,24 @@ export const uploadFile = (file: File, onProgress?: (pct: number) => void) => up
 
 export const deleteFile = (fileId: number) => Api.delete(`/files/${fileId}`);
 
-export const askLibrary = (q: string) => Api.post<{ answer: string }>("/ask", { q });
+export async function askLibrary(q: string, onChunk: (chunk: string) => void) {
+  const options: RequestInit = { method: "POST", body: JSON.stringify({ q }) };
+  const res = await withAuth("/ask", () => send("/ask", options));
+  if (!res.ok) {
+    await parse(res);
+    return;
+  }
+  if (!res.body) throw new Error("LLM returned an uncorrect answer");
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let got = false;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const chunk = decoder.decode(value, { stream: true });
+    if (!chunk) continue;
+    got = true;
+    onChunk(chunk);
+  }
+  if (!got) throw new Error("LLM returned an empty answer");
+}

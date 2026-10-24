@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import exists, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.v1.paging import contains
 from app.core.database import get_db
-from app.core.llm import complete
+from app.core.llm import stream
 from app.core.security import require_auth
 from app.core.uploads import UPLOAD_DIR
 from app.models.file import File
@@ -21,10 +22,6 @@ class AskIn(BaseModel):
     q: str
 
 
-class AskOut(BaseModel):
-    answer: str
-
-
 def _clip(text: str) -> str:
     text = text.strip()
     return text if len(text) <= MAX_CHARS else text[:MAX_CHARS] + "…"
@@ -37,7 +34,7 @@ def _file_body(stored: str) -> str:
     return _clip(path.read_text(encoding="utf-8", errors="replace"))
 
 
-@router.post("/ask", response_model=AskOut)
+@router.post("/ask")
 def ask(data: AskIn, user: User = Depends(require_auth), db: Session = Depends(get_db)):
     q = data.q.strip()
     if not q:
@@ -80,4 +77,8 @@ def ask(data: AskIn, user: User = Depends(require_auth), db: Session = Depends(g
         if body:
             chunk += f"\n{body}"
         parts.append(chunk)
-    return AskOut(answer=complete("\n\n".join(parts)))
+    return StreamingResponse(
+        stream("\n\n".join(parts)),
+        media_type="text/plain; charset=utf-8",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )

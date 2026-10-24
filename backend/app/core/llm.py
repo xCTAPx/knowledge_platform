@@ -1,18 +1,21 @@
 import json
 import urllib.error
 import urllib.request
+from collections.abc import Iterator
+from http.client import HTTPResponse
 
 from fastapi import HTTPException
 
 from app.core.config import settings
 
 
-def complete(prompt: str) -> str:
+def _open(prompt: str) -> HTTPResponse:
     if not settings.llm_api_key:
         raise HTTPException(503, "Here is no API key")
     payload = json.dumps(
         {
             "model": settings.llm_model,
+            "stream": True,
             "messages": [
                 {
                     "role": "system",
@@ -34,16 +37,33 @@ def complete(prompt: str) -> str:
         },
     )
     try:
-        with urllib.request.urlopen(req, timeout=60) as res:
-            data = json.loads(res.read().decode())
+        return urllib.request.urlopen(req, timeout=120)
     except urllib.error.HTTPError as err:
         raise HTTPException(502, err.read().decode()[:300] or "LLM request failed") from err
     except urllib.error.URLError as err:
         raise HTTPException(502, "Could not reach the LLM") from err
-    try:
-        text = data["choices"][0]["message"]["content"]
-    except (KeyError, IndexError, TypeError) as err:
-        raise HTTPException(502, "LLM returned an empty answer") from err
-    if not text or not str(text).strip():
-        raise HTTPException(502, "LLM returned an empty answer")
-    return str(text).strip()
+
+
+def stream(prompt: str) -> Iterator[bytes]:
+    res = _open(prompt)
+
+    def chunks() -> Iterator[bytes]:
+        with res:
+            while True:
+                line = res.readline()
+                if not line:
+                    break
+                raw = line.decode().strip()
+                if not raw.startswith("data:"):
+                    continue
+                data = raw[5:].strip()
+                if data == "[DONE]":
+                    break
+                try:
+                    piece = json.loads(data)["choices"][0]["delta"].get("content")
+                except (KeyError, IndexError, TypeError, json.JSONDecodeError):
+                    continue
+                if piece:
+                    yield str(piece).encode()
+
+    return chunks()

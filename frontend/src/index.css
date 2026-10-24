@@ -304,6 +304,18 @@ a.button:hover {
   white-space: pre-wrap;
 }
 
+.answer.streaming::after {
+  content: "▍";
+  margin-left: 1px;
+  animation: caret 1s step-end infinite;
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
 mark.hit {
   background: #ffe566;
   color: inherit;

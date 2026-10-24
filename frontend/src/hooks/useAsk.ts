@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { errMsg } from "../lib/files";
+import { letterStream } from "../lib/stream";
 import { askLibrary } from "../services/api";
 
 export function useAsk() {
@@ -15,9 +16,12 @@ export function useAsk() {
     setError("");
     setAnswer("");
     setBusy(true);
+    const letters = letterStream(setAnswer);
     try {
-      setAnswer((await askLibrary(q)).answer);
+      await askLibrary(q, letters.push);
+      await letters.end();
     } catch (err) {
+      letters.stop();
       setError(errMsg(err, "Could not ask"));
     } finally {
       setBusy(false);
