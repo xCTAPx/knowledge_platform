@@ -1,0 +1,12 @@
+.kind-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.kind-toggle button {
+  flex: 1;
+}
+
+.kind-toggle button.on {
+  pointer-events: none;
+}

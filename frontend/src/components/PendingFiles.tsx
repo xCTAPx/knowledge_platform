@@ -1,3 +1,6 @@
+import "./StoredFiles.css";
+import "./UploadStatus.css";
+
 export function PendingFiles({
   files,
   busy,

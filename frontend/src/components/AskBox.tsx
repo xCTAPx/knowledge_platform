@@ -1,5 +1,6 @@
 import { FormEvent } from "react";
 import { isolateSubmit } from "../lib/forms";
+import "./AskBox.css";
 
 export function AskBox({
   value,

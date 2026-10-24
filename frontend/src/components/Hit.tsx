@@ -1,3 +1,5 @@
+import "./Hit.css";
+
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

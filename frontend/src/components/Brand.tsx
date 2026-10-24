@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import "./Brand.css";
 
 export function Brand({ to }: { to?: string }) {
   const inner = (

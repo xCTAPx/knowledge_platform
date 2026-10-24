@@ -13,6 +13,7 @@ export function useAsk() {
     event.preventDefault();
     const q = value.trim();
     if (!q) return;
+    setValue("");
     setError("");
     setAnswer("");
     setBusy(true);

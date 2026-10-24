@@ -1,0 +1,95 @@
+.tape {
+  margin: 16px 0 0;
+}
+
+.tape-empty {
+  margin: 16px 0 0;
+}
+
+.tape-space {
+  position: relative;
+  width: 100%;
+}
+
+.tape-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding-bottom: 8px;
+}
+
+.note,
+.file-card {
+  padding: 10px 12px;
+  border: 1px solid #e0d4c2;
+  border-radius: 12px;
+  background: #faf6ee;
+}
+
+.note {
+  border-left: 6px solid #3b6ea5;
+}
+
+.file-card {
+  border-left: 6px solid #9a4a2a;
+}
+
+.file-card .file-type {
+  margin: 0 0 2px;
+  color: #9a4a2a;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tape-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.tape-row .actions {
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.tape-row .actions button {
+  font-size: 0.8rem;
+}
+
+.tape-row .actions button:not(.icon-btn) {
+  padding: 4px 10px;
+}
+
+.note h2,
+.file-card h2 {
+  margin: 0;
+  font-family: Fraunces, Georgia, serif;
+  font-size: 1.05rem;
+}
+
+.file-card h2 {
+  word-break: break-word;
+}
+
+.note p {
+  margin: 4px 0 0;
+  color: #6b6258;
+}
+
+.note .excerpt {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+}
+
+.note .tags {
+  margin: 4px 0 0;
+  color: #9a4a2a;
+  font-size: 0.8rem;
+}

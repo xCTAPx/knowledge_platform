@@ -15,7 +15,7 @@ export function useFiles(feed: {
 
   async function onSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!loose.length) return;
+    if (!loose.length) return false;
     const form = event.currentTarget;
     setError("");
     setBusy(true);
@@ -37,8 +37,10 @@ export function useFiles(feed: {
       else feed.setItems([...uploaded, ...feed.items]);
       setLoose([]);
       form.reset();
+      return true;
     } catch (err) {
       setError(errMsg(err, "Could not save file"));
+      return false;
     } finally {
       await keepBusy(started);
       setBusy(false);

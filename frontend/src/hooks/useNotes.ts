@@ -57,8 +57,10 @@ export function useNotes(feed: {
       }
       cancel();
       form.reset();
+      return true;
     } catch (err) {
       setError(errMsg(err, "Could not save note"));
+      return false;
     } finally {
       await keepBusy(started);
       setBusy(false);

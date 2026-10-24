@@ -2,8 +2,11 @@ import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { fileKind } from "../lib/files";
 import { fileUrl, noteFileUrl, type FeedItem, type Note } from "../services/api";
+import { FilePreview } from "./FilePreview";
 import { Hit } from "./Hit";
+import { Icon } from "./Icon";
 import { StoredFiles } from "./StoredFiles";
+import "./FeedList.css";
 
 export function FeedList({
   items,
@@ -28,9 +31,10 @@ export function FeedList({
 }) {
   const listRef = useRef<HTMLDivElement>(null);
   const [scrollMargin, setScrollMargin] = useState(0);
+  const [preview, setPreview] = useState<{ name: string; url: string } | null>(null);
   const virtualizer = useWindowVirtualizer({
     count: items.length,
-    estimateSize: (index) => (items[index]?.kind === "file" ? 160 : 200),
+    estimateSize: (index) => (items[index]?.kind === "file" ? 72 : 96),
     overscan: 6,
     scrollMargin,
   });
@@ -63,44 +67,49 @@ export function FeedList({
             >
               {item.kind === "note" ? (
                 <article className="note">
-                  <h2>
-                    <Hit text={item.title} q={q} />
-                  </h2>
+                  <div className="tape-row">
+                    <h2>
+                      <Hit text={item.title} q={q} />
+                    </h2>
+                    <div className="actions">
+                      <button type="button" className="ghost icon-btn" aria-label="Edit" onClick={() => onEdit(item)}>
+                        <Icon name="pencil" />
+                      </button>
+                      <button type="button" className="ghost icon-btn" aria-label="Delete" onClick={() => onDeleteNote(item.id)}>
+                        <Icon name="trash" />
+                      </button>
+                    </div>
+                  </div>
                   {item.tags.length ? <p className="tags">{item.tags.map((tag) => `#${tag}`).join(" ")}</p> : null}
                   {item.content ? (
-                    <p>
+                    <p className="excerpt">
                       <Hit text={item.content} q={q} />
                     </p>
                   ) : null}
                   <StoredFiles
                     files={item.files}
                     q={q}
-                    href={(id) => noteFileUrl(item.id, id)}
-                    action="Remove"
+                    onPreview={(file) => setPreview({ name: file.name, url: noteFileUrl(item.id, file.id) })}
                     onAction={(id) => onRemoveFile(item.id, id)}
                   />
-                  <div className="actions">
-                    <button type="button" className="ghost" onClick={() => onEdit(item)}>
-                      Edit
-                    </button>
-                    <button type="button" className="ghost" onClick={() => onDeleteNote(item.id)}>
-                      Delete
-                    </button>
-                  </div>
                 </article>
               ) : (
                 <article className="file-card">
-                  <p className="file-type">{fileKind(item.name)}</p>
-                  <h2>
-                    <Hit text={item.name} q={q} />
-                  </h2>
-                  <div className="actions">
-                    <a className="button ghost" href={fileUrl(item.id)} target="_blank" rel="noreferrer">
-                      Open
-                    </a>
-                    <button type="button" className="ghost" onClick={() => onDeleteFile(item.id)}>
-                      Delete
-                    </button>
+                  <div className="tape-row">
+                    <div>
+                      <p className="file-type">{fileKind(item.name)}</p>
+                      <h2>
+                        <Hit text={item.name} q={q} />
+                      </h2>
+                    </div>
+                    <div className="actions">
+                      <button type="button" className="ghost icon-btn" aria-label="View" onClick={() => setPreview({ name: item.name, url: fileUrl(item.id) })}>
+                        <Icon name="eye" />
+                      </button>
+                      <button type="button" className="ghost icon-btn" aria-label="Delete" onClick={() => onDeleteFile(item.id)}>
+                        <Icon name="trash" />
+                      </button>
+                    </div>
                   </div>
                 </article>
               )}
@@ -108,6 +117,7 @@ export function FeedList({
           );
         })}
       </div>
+      {preview ? <FilePreview name={preview.name} url={preview.url} onClose={() => setPreview(null)} /> : null}
     </div>
   );
 }

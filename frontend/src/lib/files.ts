@@ -8,6 +8,14 @@ export function fileKind(name: string) {
   return "Text";
 }
 
+export function isPdf(name: string) {
+  return name.split(".").pop()?.toLowerCase() === "pdf";
+}
+
+export function isMd(name: string) {
+  return name.split(".").pop()?.toLowerCase() === "md";
+}
+
 export function pickFiles(list: FileList | null) {
   return Array.from(list ?? []).filter((file) => FILE_OK.test(file.name));
 }

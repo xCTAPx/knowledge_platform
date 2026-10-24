@@ -1,3 +1,5 @@
+import "./SearchBox.css";
+
 export function SearchBox({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   return (
     <form

@@ -20,7 +20,7 @@ Do not grow `HomePage.tsx` (or any page) with large new markup. The page wires s
 
 1. New feature or view → new file (or small set of files), named after the feature.
 2. Page imports it and passes props. Keep page orchestration only.
-3. Feature-specific CSS stays with existing `index.css` classes for that feature; do not restyle unrelated views in the same change.
+3. Feature-specific CSS lives next to the component (`Component.css` imported from `Component.tsx`). Keep only global layout (reset, shell, card, forms, buttons) in `index.css`. Do not restyle unrelated views in the same change.
 4. Do not copy-paste a similar block into an existing component “for now”.
 
 ## Examples

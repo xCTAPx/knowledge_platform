@@ -1,16 +1,16 @@
 import { Hit } from "./Hit";
+import { Icon } from "./Icon";
+import "./StoredFiles.css";
 
 export function StoredFiles({
   files,
   q = "",
-  href,
-  action,
+  onPreview,
   onAction,
 }: {
   files: { id: number; name: string }[];
   q?: string;
-  href: (id: number) => string;
-  action: string;
+  onPreview: (file: { id: number; name: string }) => void;
   onAction: (id: number) => void;
 }) {
   if (!files.length) return null;
@@ -18,12 +18,17 @@ export function StoredFiles({
     <ul className="files">
       {files.map((file) => (
         <li key={file.id}>
-          <a href={href(file.id)} target="_blank" rel="noreferrer">
+          <button type="button" className="file-name" onClick={() => onPreview(file)}>
             <Hit text={file.name} q={q} />
-          </a>
-          <button type="button" className="ghost" onClick={() => onAction(file.id)}>
-            {action}
           </button>
+          <div className="actions">
+            <button type="button" className="ghost icon-btn" aria-label="View" onClick={() => onPreview(file)}>
+              <Icon name="eye" />
+            </button>
+            <button type="button" className="ghost icon-btn" aria-label="Delete" onClick={() => onAction(file.id)}>
+              <Icon name="trash" />
+            </button>
+          </div>
         </li>
       ))}
     </ul>
