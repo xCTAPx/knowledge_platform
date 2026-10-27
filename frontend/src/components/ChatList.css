@@ -1,0 +1,81 @@
+.chat-list {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding-right: 12px;
+  border-right: 1px solid #b7c4b8;
+}
+
+.chat-list > button {
+  width: 100%;
+  padding: 8px 12px;
+}
+
+.chat-list > button:disabled {
+  cursor: default;
+}
+
+.chat-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.chat-list li {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  border-radius: 8px;
+}
+
+.chat-list li.on {
+  background: #fffdf8;
+  box-shadow: inset 3px 0 0 #243c32;
+}
+
+.chat-list .chat-title {
+  min-width: 0;
+  flex: 1;
+  justify-content: flex-start;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #6b6258;
+  font-size: 0.85rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-list li.on button.chat-title {
+  color: #1c1915;
+  pointer-events: none;
+}
+
+.chat-list input.chat-title {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid #243c32;
+  background: #fffdf8;
+}
+
+.chat-list .chat-title:hover,
+.chat-list .icon-btn:hover {
+  background: #e8dfd0;
+  color: #1c1915;
+}
+
+.chat-list .icon-btn {
+  flex-shrink: 0;
+  min-width: 28px;
+  padding: 4px;
+  border: 0;
+  color: #6b6258;
+}

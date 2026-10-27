@@ -1,25 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
 from sqlalchemy import exists, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.v1.paging import contains
-from app.core.database import get_db
-from app.core.llm import stream
-from app.core.security import require_auth
 from app.core.uploads import UPLOAD_DIR
 from app.models.file import File
 from app.models.note import Note
 from app.models.user import User
 
-router = APIRouter()
 MAX_ITEMS = 8
 MAX_CHARS = 1500
-
-
-class AskIn(BaseModel):
-    q: str
 
 
 def _clip(text: str) -> str:
@@ -34,11 +23,7 @@ def _file_body(stored: str) -> str:
     return _clip(path.read_text(encoding="utf-8", errors="replace"))
 
 
-@router.post("/ask")
-def ask(data: AskIn, user: User = Depends(require_auth), db: Session = Depends(get_db)):
-    q = data.q.strip()
-    if not q:
-        raise HTTPException(400, "Ask a question")
+def library_excerpts(q: str, user: User, db: Session) -> str:
     attached = exists().where(File.note_id == Note.id, contains(File.name, q))
     notes = db.scalars(
         select(Note)
@@ -60,7 +45,7 @@ def ask(data: AskIn, user: User = Depends(require_auth), db: Session = Depends(g
         files = db.scalars(
             select(File).where(File.user_id == user.id, File.note_id.is_(None)).order_by(File.id.desc()).limit(MAX_ITEMS)
         ).all()
-    parts = [f"Question: {q}", "Library:"]
+    parts: list[str] = []
     for note in notes:
         names = ", ".join(item.name for item in note.files)
         chunk = f"# {note.title}\n{_clip(note.content)}"
@@ -77,8 +62,4 @@ def ask(data: AskIn, user: User = Depends(require_auth), db: Session = Depends(g
         if body:
             chunk += f"\n{body}"
         parts.append(chunk)
-    return StreamingResponse(
-        stream("\n\n".join(parts)),
-        media_type="text/plain; charset=utf-8",
-        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
-    )
+    return "\n\n".join(parts)

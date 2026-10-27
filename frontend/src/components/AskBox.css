@@ -33,30 +33,6 @@
   outline-offset: 1px;
 }
 
-.ask .error,
-.ask .answer {
+.ask .error {
   grid-column: 1 / -1;
-}
-
-.answer {
-  margin: 0;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: #fffdf8;
-  border: 1px solid #e0d4c2;
-  color: #1c1915;
-  font-weight: 400;
-  white-space: pre-wrap;
-}
-
-.answer.streaming::after {
-  content: "▍";
-  margin-left: 1px;
-  animation: caret 1s step-end infinite;
-}
-
-@keyframes caret {
-  50% {
-    opacity: 0;
-  }
 }

@@ -1,0 +1,44 @@
+.library {
+  margin: 28px 0 0;
+  padding: 16px 18px 18px;
+  border: 1px solid #e0d4c2;
+  border-radius: 16px;
+  background: #faf6ee;
+}
+
+.library-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.library h2 {
+  margin: 0;
+  font-family: Fraunces, Georgia, serif;
+  font-size: 1.15rem;
+}
+
+.library-filters {
+  display: flex;
+  gap: 6px;
+}
+
+.library-filters button {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.library-filters button[aria-pressed="false"] {
+  opacity: 0.45;
+}
+
+.library .search {
+  margin: 0;
+}
+
+.library .tape,
+.library .tape-empty {
+  margin: 14px 0 0;
+}

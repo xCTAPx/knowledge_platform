@@ -159,9 +159,34 @@ export const uploadFile = (file: File, onProgress?: (pct: number) => void) => up
 
 export const deleteFile = (fileId: number) => Api.delete(`/files/${fileId}`);
 
-export async function askLibrary(q: string, onChunk: (chunk: string) => void) {
-  const options: RequestInit = { method: "POST", body: JSON.stringify({ q }) };
-  const res = await withAuth("/ask", () => send("/ask", options));
+export type Conversation = {
+  id: number;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  message_count: number;
+};
+
+export type ChatMessage = {
+  id: number;
+  role: "user" | "assistant";
+  text: string;
+  created_at: string;
+};
+
+export const listConversations = () => Api.get<Conversation[]>("/conversations");
+
+export const createConversation = () => Api.post<Conversation>("/conversations");
+
+export const getConversation = (id: number) => Api.get<Conversation>(`/conversations/${id}`);
+
+export const renameConversation = (id: number, title: string) => Api.patch<Conversation>(`/conversations/${id}`, { title });
+
+export const deleteConversation = (id: number) => Api.delete(`/conversations/${id}`);
+
+export const listMessages = (id: number) => Api.get<ChatMessage[]>(`/conversations/${id}/messages`);
+
+async function readPlain(res: Response, onChunk: (chunk: string) => void) {
   if (!res.ok) {
     await parse(res);
     return;
@@ -179,4 +204,9 @@ export async function askLibrary(q: string, onChunk: (chunk: string) => void) {
     onChunk(chunk);
   }
   if (!got) throw new Error("LLM returned an empty answer");
+}
+
+export async function sendMessage(id: number, text: string, onChunk: (chunk: string) => void) {
+  const options: RequestInit = { method: "POST", body: JSON.stringify({ text }) };
+  await readPlain(await withAuth(`/conversations/${id}/messages`, () => send(`/conversations/${id}/messages`, options)), onChunk);
 }

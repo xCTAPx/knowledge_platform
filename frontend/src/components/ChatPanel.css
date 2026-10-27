@@ -1,0 +1,42 @@
+.chats {
+  display: grid;
+  grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  margin: 8px 0 0;
+  padding: 16px 18px 18px;
+  border: 1px solid #c5d0c6;
+  border-radius: 16px;
+  background: #e8eee8;
+}
+
+.chats > h2 {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-family: Fraunces, Georgia, serif;
+  font-size: 1.15rem;
+}
+
+.chat-main {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  align-content: start;
+}
+
+.chat-main .ask {
+  margin: 0;
+}
+
+@media (max-width: 700px) {
+  .chats {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-list {
+    padding-right: 0;
+    padding-bottom: 12px;
+    border-right: 0;
+    border-bottom: 1px solid #b7c4b8;
+  }
+}

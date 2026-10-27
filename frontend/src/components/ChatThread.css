@@ -1,0 +1,48 @@
+.chat-empty {
+  margin: 0;
+}
+
+.chat-thread {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.msg p {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.msg.user p {
+  margin-left: 18%;
+  background: #243c32;
+  color: #f4efe6;
+}
+
+.msg.assistant p {
+  margin-right: 8%;
+  background: #fffdf8;
+  border: 1px solid #e0d4c2;
+  color: #1c1915;
+}
+
+.msg.assistant p.streaming::after {
+  content: "▍";
+  margin-left: 1px;
+  animation: caret 1s step-end infinite;
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}

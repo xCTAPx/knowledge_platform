@@ -24,6 +24,16 @@
   gap: 4px;
 }
 
+.files .icon-btn {
+  border: 0;
+  color: #6b6258;
+}
+
+.files .icon-btn:hover {
+  background: #e8dfd0;
+  color: #1c1915;
+}
+
 .file-name {
   min-width: 0;
   padding: 0;

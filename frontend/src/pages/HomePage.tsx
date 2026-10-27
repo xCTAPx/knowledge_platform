@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { AskBox } from "../components/AskBox";
+import { ChatPanel } from "../components/ChatPanel";
 import { ComposeDrawer } from "../components/ComposeDrawer";
-import { FeedList } from "../components/FeedList";
 import { LibraryCard } from "../components/LibraryCard";
+import { LibraryPanel } from "../components/LibraryPanel";
 import { NoteForm } from "../components/NoteForm";
-import { SearchBox } from "../components/SearchBox";
 import { Topbar } from "../components/Topbar";
-import { useAsk } from "../hooks/useAsk";
+import { useChats } from "../hooks/useChats";
 import { useAuth } from "../hooks/useAuth";
 import { useFeed } from "../hooks/useFeed";
 import { useFiles } from "../hooks/useFiles";
@@ -19,8 +18,8 @@ export default function HomePage() {
   const feed = useFeed(auth.user);
   const notes = useNotes(feed);
   const files = useFiles(feed);
-  const ask = useAsk();
-  const locked = notes.busy || files.busy || ask.busy;
+  const chats = useChats(auth.user);
+  const locked = notes.busy || files.busy || chats.busy;
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState<"note" | "file">("note");
 
@@ -48,29 +47,35 @@ export default function HomePage() {
   return (
     <main className="shell wide">
       <Topbar nickname={auth.user.nickname} onAdd={openAdd} onLogout={auth.onLogout} />
-      <SearchBox value={feed.query} onChange={feed.setQuery} />
-      <AskBox
-        value={ask.value}
-        busy={ask.busy}
+      <ChatPanel
+        chats={chats.chats}
+        messages={chats.messages}
+        activeId={chats.activeId}
+        value={chats.value}
+        busy={chats.busy}
         locked={locked}
-        error={ask.error}
-        answer={ask.answer}
-        onChange={ask.setValue}
-        onSubmit={ask.onSubmit}
+        error={chats.error}
+        canNew={chats.canNew}
+        onSelect={chats.setActiveId}
+        onNew={chats.newChat}
+        onRename={chats.renameChat}
+        onRemove={chats.removeChat}
+        onChange={chats.setValue}
+        onSubmit={chats.onSubmit}
       />
-      {feed.ready ? (
-        <FeedList
-          items={feed.items}
-          hasMore={feed.hasMore}
-          empty={feed.q ? "Nothing matches." : "No notes or files yet."}
-          q={feed.q}
-          onLoadMore={feed.loadMore}
-          onEdit={openEdit}
-          onDeleteNote={notes.onDelete}
-          onRemoveFile={notes.onRemoveFile}
-          onDeleteFile={files.onDelete}
-        />
-      ) : null}
+      <LibraryPanel
+        query={feed.query}
+        q={feed.q}
+        items={feed.items}
+        hasMore={feed.hasMore}
+        ready={feed.ready}
+        onQuery={feed.setQuery}
+        onLoadMore={feed.loadMore}
+        onEdit={openEdit}
+        onDeleteNote={notes.onDelete}
+        onRemoveFile={notes.onRemoveFile}
+        onDeleteFile={files.onDelete}
+      />
       <ComposeDrawer
         open={open}
         kind={kind}

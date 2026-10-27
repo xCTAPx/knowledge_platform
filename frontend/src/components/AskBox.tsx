@@ -7,7 +7,6 @@ export function AskBox({
   busy,
   locked,
   error,
-  answer,
   onChange,
   onSubmit,
 }: {
@@ -15,7 +14,6 @@ export function AskBox({
   busy: boolean;
   locked: boolean;
   error: string;
-  answer: string;
   onChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
@@ -40,7 +38,6 @@ export function AskBox({
         {busy ? "Asking…" : "Ask"}
       </button>
       {error ? <p className="error">{error}</p> : null}
-      {answer || busy ? <p className={busy ? "answer streaming" : "answer"}>{answer}</p> : null}
     </form>
   );
 }
