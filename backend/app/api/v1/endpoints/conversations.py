@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal, get_db
 from app.core.library import library_excerpts
-from app.core.llm import stream
+from app.core.llm import complete, stream
 from app.core.security import require_auth
 from app.models.conversation import Conversation, ConversationMessage
 from app.models.user import User
@@ -54,6 +54,22 @@ def _count(conversation_id: int, db: Session) -> int:
 
 def _out(row: Conversation, n: int) -> ConversationOut:
     return ConversationOut(id=row.id, title=row.title, created_at=row.created_at, updated_at=row.updated_at, message_count=n)
+
+
+def _draft_title(text: str) -> str:
+    return " ".join(text.split())[:60]
+
+
+def _smart_title(question: str, answer: str) -> str:
+    try:
+        raw = complete(
+            f"Question:\n{question[:400]}\n\nAnswer:\n{answer[:400]}",
+            "Reply with a chat title only: 3 to 6 words, same language as the question, no quotes.",
+        )
+    except HTTPException:
+        return ""
+    line = raw.splitlines()[0].strip(" \"'`") if raw else ""
+    return line[:80]
 
 
 @router.get("/conversations", response_model=list[ConversationOut])
@@ -116,8 +132,9 @@ def send_message(conversation_id: int, data: MessageIn, user: User = Depends(req
     text = data.text.strip()
     if not text:
         raise HTTPException(400, "Ask a question")
-    if not _count(row.id, db) or row.title == "New chat":
-        row.title = text[:80]
+    needs_title = not _count(row.id, db) or row.title == "New chat"
+    if needs_title:
+        row.title = _draft_title(text)
     db.add(ConversationMessage(conversation_id=row.id, role="user", text=text))
     row.updated_at = datetime.now(timezone.utc)
     db.commit()
@@ -147,6 +164,10 @@ def send_message(conversation_id: int, data: MessageIn, user: User = Depends(req
                 conv = extra.get(Conversation, conv_id)
                 if conv:
                     conv.updated_at = datetime.now(timezone.utc)
+                    if needs_title:
+                        titled = _smart_title(text, body)
+                        if titled:
+                            conv.title = titled
                 extra.commit()
             finally:
                 extra.close()

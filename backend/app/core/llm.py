@@ -9,10 +9,30 @@ from fastapi import HTTPException
 from app.core.config import settings
 
 
-def _open(prompt: str) -> HTTPResponse:
+def _post(payload: dict, timeout: int = 120) -> HTTPResponse:
     if not settings.llm_api_key:
         raise HTTPException(503, "Here is no API key")
-    payload = json.dumps(
+    req = urllib.request.Request(
+        f"{settings.llm_base_url.rstrip('/')}/chat/completions",
+        data=json.dumps(payload).encode(),
+        method="POST",
+        headers={
+            "Authorization": f"Bearer {settings.llm_api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": settings.frontend_origin,
+            "X-Title": settings.app_name,
+        },
+    )
+    try:
+        return urllib.request.urlopen(req, timeout=timeout)
+    except urllib.error.HTTPError as err:
+        raise HTTPException(502, err.read().decode()[:300] or "LLM request failed") from err
+    except urllib.error.URLError as err:
+        raise HTTPException(502, "Could not reach the LLM") from err
+
+
+def stream(prompt: str) -> Iterator[bytes]:
+    res = _post(
         {
             "model": settings.llm_model,
             "stream": True,
@@ -24,28 +44,7 @@ def _open(prompt: str) -> HTTPResponse:
                 {"role": "user", "content": prompt},
             ],
         }
-    ).encode()
-    req = urllib.request.Request(
-        f"{settings.llm_base_url.rstrip('/')}/chat/completions",
-        data=payload,
-        method="POST",
-        headers={
-            "Authorization": f"Bearer {settings.llm_api_key}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": settings.frontend_origin,
-            "X-Title": settings.app_name,
-        },
     )
-    try:
-        return urllib.request.urlopen(req, timeout=120)
-    except urllib.error.HTTPError as err:
-        raise HTTPException(502, err.read().decode()[:300] or "LLM request failed") from err
-    except urllib.error.URLError as err:
-        raise HTTPException(502, "Could not reach the LLM") from err
-
-
-def stream(prompt: str) -> Iterator[bytes]:
-    res = _open(prompt)
 
     def chunks() -> Iterator[bytes]:
         with res:
@@ -67,3 +66,24 @@ def stream(prompt: str) -> Iterator[bytes]:
                     yield str(piece).encode()
 
     return chunks()
+
+
+def complete(prompt: str, system: str, max_tokens: int = 24) -> str:
+    res = _post(
+        {
+            "model": settings.llm_model,
+            "stream": False,
+            "max_tokens": max_tokens,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt},
+            ],
+        },
+        timeout=30,
+    )
+    with res:
+        data = json.loads(res.read().decode())
+    try:
+        return str(data["choices"][0]["message"]["content"]).strip()
+    except (KeyError, IndexError, TypeError):
+        return ""

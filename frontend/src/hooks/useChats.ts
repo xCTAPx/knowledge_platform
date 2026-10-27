@@ -4,6 +4,7 @@ import { letterStream } from "../lib/stream";
 import {
   createConversation,
   deleteConversation,
+  getConversation,
   listConversations,
   listMessages,
   renameConversation,
@@ -124,9 +125,7 @@ export function useChats(user: User | null) {
         { id: asstId, role: "assistant", text: "", created_at: "" },
       ]);
       setChats((prev) =>
-        prev.map((chat) =>
-          chat.id === chatId ? { ...chat, title: chat.message_count ? chat.title : q.slice(0, 80), message_count: chat.message_count + 1 } : chat
-        )
+        prev.map((chat) => (chat.id === chatId ? { ...chat, title: chat.message_count ? chat.title : (q.split("\n")[0] ?? q), message_count: chat.message_count + 1 } : chat))
       );
       setBusy(true);
       const letters = letterStream((text) => {
@@ -135,8 +134,9 @@ export function useChats(user: User | null) {
       try {
         await sendMessage(chatId, q, letters.push);
         await letters.end();
-        const items = await listMessages(chatId);
+        const [items, chat] = await Promise.all([listMessages(chatId), getConversation(chatId)]);
         setMessages(items);
+        setChats((prev) => prev.map((item) => (item.id === chatId ? chat : item)));
       } catch (err) {
         letters.stop();
         throw err;
