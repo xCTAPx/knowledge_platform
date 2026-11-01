@@ -8,3 +8,7 @@ psycopg[binary]
 alembic
 pyjwt
 bcrypt
+qdrant-client
+langchain-text-splitters
+tiktoken
+pypdf
