@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     llm_base_url: str = "https://openrouter.ai/api/v1"
     llm_api_key: str = ""
     llm_model: str = "openai/gpt-4o-mini"
+    embed_model: str = "BAAI/bge-m3"
+    qdrant_url: str = "http://localhost:6333"
 
 
 settings = Settings()

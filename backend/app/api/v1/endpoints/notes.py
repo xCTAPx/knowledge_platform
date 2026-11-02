@@ -10,6 +10,7 @@ from app.api.v1.paging import Page, page_limit, sliced
 from app.core.database import get_db
 from app.core.security import require_auth
 from app.core.uploads import file_response, store_upload, unlink
+from app.core.vectors import drop_file, drop_note, index_file, index_note
 from app.models.file import File
 from app.models.note import Note
 from app.models.user import User
@@ -61,6 +62,7 @@ def create_note(data: NoteIn, user: User = Depends(require_auth), db: Session = 
     db.add(note)
     db.commit()
     db.refresh(note)
+    index_note(note)
     return note
 
 
@@ -72,17 +74,20 @@ def update_note(note_id: int, data: NoteIn, user: User = Depends(require_auth), 
     note.tags = data.tags
     db.commit()
     db.refresh(note)
+    index_note(note)
     return note
 
 
 @router.delete("/notes/{note_id}")
 def delete_note(note_id: int, user: User = Depends(require_auth), db: Session = Depends(get_db)):
     note = _owned(note_id, user, db)
+    file_ids = [item.id for item in note.files]
     for item in list(note.files):
         unlink(item.stored)
         db.delete(item)
     db.delete(note)
     db.commit()
+    drop_note(user.id, note_id, file_ids)
 
 
 @router.post("/notes/{note_id}/files", response_model=FileOut)
@@ -93,6 +98,7 @@ def add_file(note_id: int, file: UploadFile, user: User = Depends(require_auth),
     db.add(row)
     db.commit()
     db.refresh(row)
+    index_file(row)
     return row
 
 
@@ -111,6 +117,8 @@ def delete_file(note_id: int, file_id: int, user: User = Depends(require_auth), 
     row = db.get(File, file_id)
     if not row or row.note_id != note.id:
         raise HTTPException(404, "File not found")
+    file_id = row.id
     unlink(row.stored)
     db.delete(row)
     db.commit()
+    drop_file(user.id, file_id)

@@ -9,6 +9,7 @@ from app.api.v1.paging import Page, page_limit, sliced
 from app.core.database import get_db
 from app.core.security import require_auth
 from app.core.uploads import file_response, store_upload, unlink
+from app.core.vectors import drop_file, index_file
 from app.models.file import File
 from app.models.user import User
 
@@ -51,6 +52,7 @@ def add_file(file: UploadFile, user: User = Depends(require_auth), db: Session =
     db.add(row)
     db.commit()
     db.refresh(row)
+    index_file(row)
     return row
 
 
@@ -63,6 +65,8 @@ def get_file(file_id: int, user: User = Depends(require_auth), db: Session = Dep
 @router.delete("/files/{file_id}")
 def delete_file(file_id: int, user: User = Depends(require_auth), db: Session = Depends(get_db)):
     row = _owned_file(file_id, user, db)
+    file_id = row.id
     unlink(row.stored)
     db.delete(row)
     db.commit()
+    drop_file(user.id, file_id)

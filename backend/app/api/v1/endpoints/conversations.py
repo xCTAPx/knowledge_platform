@@ -145,7 +145,7 @@ def send_message(conversation_id: int, data: MessageIn, user: User = Depends(req
         .limit(HISTORY)
     ).all()[::-1]
     chat = "\n".join(f"{msg.role}: {msg.text}" for msg in prior)
-    prompt = f"Chat:\n{chat}\n\nLibrary:\n{library_excerpts(text, user, db)}"
+    prompt = f"Chat:\n{chat}\n\nLibrary:\n{library_excerpts(text, user)}"
     conv_id = row.id
 
     def chunks():
