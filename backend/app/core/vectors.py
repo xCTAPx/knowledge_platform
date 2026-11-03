@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from uuid import uuid4
 
 from qdrant_client import QdrantClient
@@ -96,7 +97,18 @@ def drop_file(user_id: int, file_id: int) -> None:
     _delete(user_id, "file", "file_id", file_id)
 
 
-def search_chunks(query: str, user_id: int) -> list[str]:
+@dataclass(frozen=True)
+class ChunkHit:
+    rank: int
+    score: float
+    text: str
+    source: str
+    title: str
+    note_id: int | None
+    file_id: int | None
+
+
+def search_chunks(query: str, user_id: int) -> list[ChunkHit]:
     text = query.strip()
     if not text:
         return []
@@ -108,7 +120,26 @@ def search_chunks(query: str, user_id: int) -> list[str]:
         limit=TOP_K,
         with_payload=True,
     ).points
-    return [str(point.payload["text"]) for point in found if point.payload and point.payload.get("text")]
+    hits: list[ChunkHit] = []
+    for point in found:
+        payload = point.payload or {}
+        body = payload.get("text")
+        if not body:
+            continue
+        note_id = payload.get("note_id")
+        file_id = payload.get("file_id")
+        hits.append(
+            ChunkHit(
+                rank=len(hits) + 1,
+                score=float(point.score),
+                text=str(body),
+                source=str(payload.get("source") or ""),
+                title=str(payload.get("title") or ""),
+                note_id=int(note_id) if note_id is not None else None,
+                file_id=int(file_id) if file_id is not None else None,
+            )
+        )
+    return hits
 
 
 def backfill_library(db: Session) -> None:

@@ -1,0 +1,438 @@
+{
+  "source": "Public-domain texts from Russian Wikisource. Chekhov died in 1904, Gogol in 1852.",
+  "note": "o_lyubvi.txt is in the corpus on purpose and has no questions: it is a near-topic distractor. A chunk is relevant when it contains evidence. Overlap can make two chunks relevant.",
+  "splitter": {
+    "chunk_tokens": 600,
+    "chunk_overlap": 80,
+    "title": "file name",
+    "markdown": false
+  },
+  "files": [
+    {
+      "file": "chelovek_v_futlyare.txt",
+      "chunks": 25,
+      "questions": 6
+    },
+    {
+      "file": "dama_s_sobachkoy.txt",
+      "chunks": 35,
+      "questions": 6
+    },
+    {
+      "file": "ionych.txt",
+      "chunks": 37,
+      "questions": 6
+    },
+    {
+      "file": "kryzhovnik.txt",
+      "chunks": 21,
+      "questions": 6
+    },
+    {
+      "file": "o_lyubvi.txt",
+      "chunks": 21,
+      "questions": 0
+    },
+    {
+      "file": "shinel.txt",
+      "chunks": 66,
+      "questions": 6
+    }
+  ],
+  "questions": [
+    {
+      "id": "q01",
+      "question": "Рядом с чьим домом на главной улице города С. жили Туркины?",
+      "file": "ionych.txt",
+      "source": "file",
+      "evidence": "Эта семья жила на главной улице, возле губернатора",
+      "relevant_chunks": [
+        {
+          "chunk_index": 1,
+          "chunk_sha256": "b5ed5e6ba17ef7563854ca203fc0e0fd622ee24a212cda21896df9d2e230a034"
+        }
+      ]
+    },
+    {
+      "id": "q02",
+      "question": "Как Иван Петрович ласково называл свою дочь?",
+      "file": "ionych.txt",
+      "source": "file",
+      "evidence": "А теперь ты, Котик, сыграй что-нибудь",
+      "relevant_chunks": [
+        {
+          "chunk_index": 5,
+          "chunk_sha256": "3aba277f6702009d4cf4ce550e16b7a69557ef28ead0a967f17f75862166417d"
+        },
+        {
+          "chunk_index": 6,
+          "chunk_sha256": "cb340bd4e9983d59741001b4c324993ae8d510b7676ebde5f89d4f4aa12d411a"
+        }
+      ]
+    },
+    {
+      "id": "q03",
+      "question": "Куда Екатерина Ивановна хотела уехать учиться музыке, хотя родители были против?",
+      "file": "ionych.txt",
+      "source": "file",
+      "evidence": "А всё-таки в консерваторию я поеду",
+      "relevant_chunks": [
+        {
+          "chunk_index": 7,
+          "chunk_sha256": "25080975ca9fb1e841a6f4b5be2ef196ffc423df1700fb91fff0e84e0d0d7822"
+        }
+      ]
+    },
+    {
+      "id": "q04",
+      "question": "Где и возле какого памятника Котик назначила Старцеву свидание в одиннадцать вечера?",
+      "file": "ionych.txt",
+      "source": "file",
+      "evidence": "будьте на кладбище возле памятника Деметти",
+      "relevant_chunks": [
+        {
+          "chunk_index": 12,
+          "chunk_sha256": "d5742f72b6dfef4ff9e8ed080bfdd89bc5f71045de06f7e74308f52bd8acb089"
+        }
+      ]
+    },
+    {
+      "id": "q05",
+      "question": "На чем Старцев ездил к городским больным спустя четыре года после знакомства с Туркиными?",
+      "file": "ionych.txt",
+      "source": "file",
+      "evidence": "уезжал уже не на паре, а на тройке с бубенчиками",
+      "relevant_chunks": [
+        {
+          "chunk_index": 23,
+          "chunk_sha256": "89c53261a8f1ed71b20278cde8bda944471b53f238d34664a5931ef283d5a07f"
+        }
+      ]
+    },
+    {
+      "id": "q06",
+      "question": "Что кричит Иван Петрович на вокзале, когда жена и дочь уезжают в Крым?",
+      "file": "ionych.txt",
+      "source": "file",
+      "evidence": "Провожая их на вокзале, Иван Петрович, когда трогается поезд, утирает слёзы и кричит",
+      "relevant_chunks": [
+        {
+          "chunk_index": 36,
+          "chunk_sha256": "b0fe0a387711ed6f6501b17619449ca2849efaf361427c7f4bb3ce58d0c3c8c3"
+        }
+      ]
+    },
+    {
+      "id": "q07",
+      "question": "Какая собака бежала за невысокой блондинкой в берете по ялтинской набережной?",
+      "file": "dama_s_sobachkoy.txt",
+      "source": "file",
+      "evidence": "за нею бежал белый шпиц",
+      "relevant_chunks": [
+        {
+          "chunk_index": 0,
+          "chunk_sha256": "b298e683d9378dd4024db185c389b6bb9665aefac5aef58c123dd5bd7cec084b"
+        }
+      ]
+    },
+    {
+      "id": "q08",
+      "question": "Как Гуров называл женщин, без чего, по его словам, не мог прожить и двух дней?",
+      "file": "dama_s_sobachkoy.txt",
+      "source": "file",
+      "evidence": "без «низшей расы» он не мог бы прожить и двух дней",
+      "relevant_chunks": [
+        {
+          "chunk_index": 2,
+          "chunk_sha256": "7ba6d1c59dc423b58c6df82e4932c86789e351f2eab5811c8eca807db2771763"
+        }
+      ]
+    },
+    {
+      "id": "q09",
+      "question": "Какое образование было у Гурова и где он служил?",
+      "file": "dama_s_sobachkoy.txt",
+      "source": "file",
+      "evidence": "по образованию филолог, но служит в банке",
+      "relevant_chunks": [
+        {
+          "chunk_index": 5,
+          "chunk_sha256": "0b3d9a974b7270669f3762fe1df727bccca85da7259983198cfc20776b74f217"
+        }
+      ]
+    },
+    {
+      "id": "q10",
+      "question": "Каким словом Анна Сергеевна назвала мужа, когда объясняла Гурову, почему уехала одна?",
+      "file": "dama_s_sobachkoy.txt",
+      "source": "file",
+      "evidence": "Мой муж, быть может, честный, хороший человек, но ведь он лакей!",
+      "relevant_chunks": [
+        {
+          "chunk_index": 10,
+          "chunk_sha256": "9003253007544f4e31bb4798632764d5e2e986a8f873bef39c1f6db83f1804d8"
+        }
+      ]
+    },
+    {
+      "id": "q11",
+      "question": "Где на рассвете Гуров и Анна Сергеевна сидели и смотрели на море?",
+      "file": "dama_s_sobachkoy.txt",
+      "source": "file",
+      "evidence": "В Ореанде сидели на скамье, недалеко от церкви",
+      "relevant_chunks": [
+        {
+          "chunk_index": 12,
+          "chunk_sha256": "5d85ff3eab38617e68d2a7b48d6011454eaa853258cf45a15593d31af7aa19ea"
+        }
+      ]
+    },
+    {
+      "id": "q12",
+      "question": "В какой московской гостинице останавливалась Анна Сергеевна, приезжая к Гурову?",
+      "file": "dama_s_sobachkoy.txt",
+      "source": "file",
+      "evidence": "останавливалась в «Славянском базаре»",
+      "relevant_chunks": [
+        {
+          "chunk_index": 28,
+          "chunk_sha256": "7b384e3df5ba88596159d600836fedfedbaca5e5b370a49ce8f710da0ab6cbce"
+        }
+      ]
+    },
+    {
+      "id": "q13",
+      "question": "В чем учитель греческого языка выходил на улицу даже в хорошую погоду?",
+      "file": "chelovek_v_futlyare.txt",
+      "source": "file",
+      "evidence": "даже в очень хорошую погоду, выходил в калошах и с зонтиком и непременно в тёплом пальто на вате",
+      "relevant_chunks": [
+        {
+          "chunk_index": 1,
+          "chunk_sha256": "5a82a7ec3c4e0753b893293fdb7576a08765c59cd7e0381199ee026400c12677"
+        }
+      ]
+    },
+    {
+      "id": "q14",
+      "question": "Какую еду Беликов выбрал, чтобы ее нельзя было счесть ни постной, ни скоромной?",
+      "file": "chelovek_v_futlyare.txt",
+      "source": "file",
+      "evidence": "ел судака на коровьем масле",
+      "relevant_chunks": [
+        {
+          "chunk_index": 6,
+          "chunk_sha256": "7e0155e655ded69b6d20d9838eba17029790769f03d943759c5d2918e3defb09"
+        }
+      ]
+    },
+    {
+      "id": "q15",
+      "question": "Почему Беликов не держал горничную и кто ему стряпал?",
+      "file": "chelovek_v_futlyare.txt",
+      "source": "file",
+      "evidence": "Женской прислуги он не держал из страха",
+      "relevant_chunks": [
+        {
+          "chunk_index": 6,
+          "chunk_sha256": "7e0155e655ded69b6d20d9838eba17029790769f03d943759c5d2918e3defb09"
+        }
+      ]
+    },
+    {
+      "id": "q16",
+      "question": "Кто приехал в город вместе с новым учителем истории и географии Михаилом Саввичем Коваленко?",
+      "file": "chelovek_v_futlyare.txt",
+      "source": "file",
+      "evidence": "Приехал он не один, а с сестрой Варенькой",
+      "relevant_chunks": [
+        {
+          "chunk_index": 8,
+          "chunk_sha256": "14b8e76e83c7ffc51b5cfea166fdfd1c5f13ac1b01eb9ef7f0ea76057acaae36"
+        }
+      ]
+    },
+    {
+      "id": "q17",
+      "question": "Какая подпись была на карикатуре, где Беликов шел под руку с Варенькой?",
+      "file": "chelovek_v_futlyare.txt",
+      "source": "file",
+      "evidence": "влюблённый антропос",
+      "relevant_chunks": [
+        {
+          "chunk_index": 15,
+          "chunk_sha256": "4440fafd39e8577660e06058bcb818c20e91f1869a6846d61348c68c9935a4a2"
+        }
+      ]
+    },
+    {
+      "id": "q18",
+      "question": "Что Беликов счел неприличным для преподавателей и женщин, когда увидел Коваленко с сестрой на улице?",
+      "file": "chelovek_v_futlyare.txt",
+      "source": "file",
+      "evidence": "Разве преподавателям гимназии и женщинам прилично ездить на велосипеде?",
+      "relevant_chunks": [
+        {
+          "chunk_index": 16,
+          "chunk_sha256": "331eeca9e464d7c8b14918dba447034f4a69442f23c9ecfad67c5e73f5ad8719"
+        }
+      ]
+    },
+    {
+      "id": "q19",
+      "question": "Как называлось имение, куда Буркин и Иван Иваныч зашли переждать дождь?",
+      "file": "kryzhovnik.txt",
+      "source": "file",
+      "evidence": "Это было Софьино, где жил Алёхин",
+      "relevant_chunks": [
+        {
+          "chunk_index": 1,
+          "chunk_sha256": "a12888da8d4e3c6a73a75778fcaf6ec8919157f8ded1bce2fdaf347661219efd"
+        }
+      ]
+    },
+    {
+      "id": "q20",
+      "question": "Кем работали Иван Иваныч и его младший брат Николай?",
+      "file": "kryzhovnik.txt",
+      "source": "file",
+      "evidence": "стал ветеринаром, а Николай уже с девятнадцати лет сидел в казённой палате",
+      "relevant_chunks": [
+        {
+          "chunk_index": 6,
+          "chunk_sha256": "2a68f160f7a98e3a0961503319dfde730bc048c55329d7b8c2e9878ff193db40"
+        }
+      ]
+    },
+    {
+      "id": "q21",
+      "question": "На ком и ради чего женился Николай Иваныч?",
+      "file": "kryzhovnik.txt",
+      "source": "file",
+      "evidence": "женился на старой, некрасивой вдове, без всякого чувства, а только потому, что у неё водились деньжонки",
+      "relevant_chunks": [
+        {
+          "chunk_index": 10,
+          "chunk_sha256": "d66d53ec2e876adc6056559efd523e178565ef90d7a9c42fd9a8a39b94e006eb"
+        }
+      ]
+    },
+    {
+      "id": "q22",
+      "question": "Сколько десятин купил Николай Иваныч и был ли там крыжовник сразу после покупки?",
+      "file": "kryzhovnik.txt",
+      "source": "file",
+      "evidence": "купил сто двенадцать десятин с барским домом, с людской, с парком, но ни фруктового сада, ни крыжовника",
+      "relevant_chunks": [
+        {
+          "chunk_index": 11,
+          "chunk_sha256": "539721e41a6dfe665b4a4ad843a8f711d2f829d51aae3f43e0740b1f960869a8"
+        }
+      ]
+    },
+    {
+      "id": "q23",
+      "question": "Какими на вкус оказались ягоды с кустов, которые Николай Иваныч посадил сам?",
+      "file": "kryzhovnik.txt",
+      "source": "file",
+      "evidence": "Было жёстко и кисло",
+      "relevant_chunks": [
+        {
+          "chunk_index": 15,
+          "chunk_sha256": "d9452101c1dd080f454e45c46716b6fd508266773317f8ccf75f1ae491ee7c79"
+        }
+      ]
+    },
+    {
+      "id": "q24",
+      "question": "Кто, по словам Ивана Иваныча, должен стоять за дверью довольного человека и о чем напоминать?",
+      "file": "kryzhovnik.txt",
+      "source": "file",
+      "evidence": "за дверью каждого довольного, счастливого человека стоял кто-нибудь с молоточком",
+      "relevant_chunks": [
+        {
+          "chunk_index": 16,
+          "chunk_sha256": "81f7f93277cc23ae6e645d1198402603869c6e62b9fd176c23d4123dc7299a63"
+        }
+      ]
+    },
+    {
+      "id": "q25",
+      "question": "Как выглядел неприметный чиновник, служивший в одном департаменте?",
+      "file": "shinel.txt",
+      "source": "file",
+      "evidence": "низенького роста, несколько рябоват, несколько рыжеват, несколько даже на-вид подслеповат",
+      "relevant_chunks": [
+        {
+          "chunk_index": 0,
+          "chunk_sha256": "386948a7ac79b2b293fcb5d941c8b62cf3a82069d5e611e9dddfbab5a58413c4"
+        }
+      ]
+    },
+    {
+      "id": "q26",
+      "question": "Что Акакий Акакиевич ел дома, не замечая вкуса?",
+      "file": "shinel.txt",
+      "source": "file",
+      "evidence": "хлебал наскоро свои щи и ел кусок говядины с луком",
+      "relevant_chunks": [
+        {
+          "chunk_index": 9,
+          "chunk_sha256": "ffcd8bc0d811b3ecaadbaadba9b9c0b89150e842c8e0891de172002873891a8f"
+        }
+      ]
+    },
+    {
+      "id": "q27",
+      "question": "Какую цену Петрович назвал за новую шинель, после чего Акакий Акакиевич вскрикнул?",
+      "file": "shinel.txt",
+      "source": "file",
+      "evidence": "Полтораста рублей за шинель",
+      "relevant_chunks": [
+        {
+          "chunk_index": 21,
+          "chunk_sha256": "cfa442a3b60090b6b077f3d8dd6bb39dfa650d1fe277f22f61fbfcea1ea8e05c"
+        }
+      ]
+    },
+    {
+      "id": "q28",
+      "question": "Чем Петрович предлагал отделать воротник, из-за чего шинель стала бы еще дороже?",
+      "file": "shinel.txt",
+      "source": "file",
+      "evidence": "Если положить на воротник куницу",
+      "relevant_chunks": [
+        {
+          "chunk_index": 21,
+          "chunk_sha256": "cfa442a3b60090b6b077f3d8dd6bb39dfa650d1fe277f22f61fbfcea1ea8e05c"
+        }
+      ]
+    },
+    {
+      "id": "q29",
+      "question": "Что сделали с Акакием Акакиевичем люди с усами на пустой площади?",
+      "file": "shinel.txt",
+      "source": "file",
+      "evidence": "сняли с него шинель, дали ему пинка коленом, и он упал навзничь в снег",
+      "relevant_chunks": [
+        {
+          "chunk_index": 41,
+          "chunk_sha256": "20849c218e0faade6ebdb3716c2b5b2d92d2a3615e2455a9959d1dab19815030"
+        }
+      ]
+    },
+    {
+      "id": "q30",
+      "question": "Кого, по городским слухам, видели ночью у Калинкина моста и что он снимал с прохожих?",
+      "file": "shinel.txt",
+      "source": "file",
+      "evidence": "у Калинкина моста и далеко подальше стал показываться по ночам мертвец",
+      "relevant_chunks": [
+        {
+          "chunk_index": 57,
+          "chunk_sha256": "b8716f55081b26ca832742227a18986453187791f4f9b8fce7dc5972a28271d5"
+        }
+      ]
+    }
+  ]
+}
