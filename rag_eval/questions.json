@@ -1,6 +1,6 @@
 {
-  "source": "Public-domain texts from Russian Wikisource. Chekhov died in 1904, Gogol in 1852.",
-  "note": "o_lyubvi.txt is in the corpus on purpose and has no questions: it is a near-topic distractor. A chunk is relevant when it contains evidence. Overlap can make two chunks relevant.",
+  "source": "Six fictional archives, plus healthcare_research.md added separately. A chunk is relevant when it contains the question evidence.",
+  "note": "observatoriya_tikhy_kholm.txt has no questions. It is a near-topic distractor. Each question asks for a fact stated in its file. A chunk is relevant when it contains evidence.",
   "splitter": {
     "chunk_tokens": 600,
     "chunk_overlap": 80,
@@ -9,428 +9,567 @@
   },
   "files": [
     {
-      "file": "chelovek_v_futlyare.txt",
-      "chunks": 25,
+      "file": "port_severny_lot.txt",
+      "chunks": 56,
+      "chars": 52746,
       "questions": 6
     },
     {
-      "file": "dama_s_sobachkoy.txt",
-      "chunks": 35,
+      "file": "klinika_bely_yar.txt",
+      "chunks": 51,
+      "chars": 49109,
       "questions": 6
     },
     {
-      "file": "ionych.txt",
-      "chunks": 37,
+      "file": "park_lunnaya_petlya.txt",
+      "chunks": 46,
+      "chars": 43877,
       "questions": 6
     },
     {
-      "file": "kryzhovnik.txt",
-      "chunks": 21,
+      "file": "sad_lunnye_gryady.txt",
+      "chunks": 42,
+      "chars": 40241,
       "questions": 6
     },
     {
-      "file": "o_lyubvi.txt",
-      "chunks": 21,
+      "file": "masterskaya_siny_klyuch.txt",
+      "chunks": 50,
+      "chars": 48816,
+      "questions": 6
+    },
+    {
+      "file": "observatoriya_tikhy_kholm.txt",
+      "chunks": 29,
+      "chars": 25117,
       "questions": 0
     },
     {
-      "file": "shinel.txt",
-      "chunks": 66,
-      "questions": 6
+      "file": "healthcare_research.md",
+      "chunks": 36,
+      "chars": 31496,
+      "questions": 10,
+      "markdown": true
     }
   ],
   "questions": [
     {
       "id": "q01",
-      "question": "Рядом с чьим домом на главной улице города С. жили Туркины?",
-      "file": "ionych.txt",
+      "question": "Какой позывной у ледокола снабжения конторы «Северный лот»?",
+      "file": "port_severny_lot.txt",
       "source": "file",
-      "evidence": "Эта семья жила на главной улице, возле губернатора",
+      "evidence": "Позывной ледокола снабжения конторы «Северный лот» — «Рябина-14». Его вызывают, когда баржи не могут сами выйти из ковша.",
       "relevant_chunks": [
         {
-          "chunk_index": 1,
-          "chunk_sha256": "b5ed5e6ba17ef7563854ca203fc0e0fd622ee24a212cda21896df9d2e230a034"
+          "chunk_index": 0,
+          "chunk_sha256": "cca8cd413122198d90638e8787151fdb630b2ac2b54c0a48a9f7722082a217d0"
         }
       ]
     },
     {
       "id": "q02",
-      "question": "Как Иван Петрович ласково называл свою дочь?",
-      "file": "ionych.txt",
+      "question": "При какой высоте волны закрывают причал номер 6?",
+      "file": "port_severny_lot.txt",
       "source": "file",
-      "evidence": "А теперь ты, Котик, сыграй что-нибудь",
+      "evidence": "Причал номер 6 закрывают, когда высота волны превышает 2.7 метра. До этого порога швартовка разрешена даже при мокром ветре.",
       "relevant_chunks": [
         {
-          "chunk_index": 5,
-          "chunk_sha256": "3aba277f6702009d4cf4ce550e16b7a69557ef28ead0a967f17f75862166417d"
-        },
-        {
-          "chunk_index": 6,
-          "chunk_sha256": "cb340bd4e9983d59741001b4c324993ae8d510b7676ebde5f89d4f4aa12d411a"
+          "chunk_index": 10,
+          "chunk_sha256": "9b2df735828b48b86b1b9b69fd610e5ecb04bed0df655957376702c793208c4f"
         }
       ]
     },
     {
       "id": "q03",
-      "question": "Куда Екатерина Ивановна хотела уехать учиться музыке, хотя родители были против?",
-      "file": "ionych.txt",
+      "question": "Кто принимает ночную смену склада тросов?",
+      "file": "port_severny_lot.txt",
       "source": "file",
-      "evidence": "А всё-таки в консерваторию я поеду",
+      "evidence": "Ночную смену склада тросов принимает Елисей Куропаткин. Дневная смена сдает ему пломбы и не оставляет ключ в замке.",
       "relevant_chunks": [
         {
-          "chunk_index": 7,
-          "chunk_sha256": "25080975ca9fb1e841a6f4b5be2ef196ffc423df1700fb91fff0e84e0d0d7822"
+          "chunk_index": 19,
+          "chunk_sha256": "34b855dc3092df7b44e10a505e182435684e93bb41e22a0d3917e31f6ddf0a5e"
         }
       ]
     },
     {
       "id": "q04",
-      "question": "Где и возле какого памятника Котик назначила Старцеву свидание в одиннадцать вечера?",
-      "file": "ionych.txt",
+      "question": "Сколько пресной воды оставалось на танкере «Морок» 3 февраля 2024 года?",
+      "file": "port_severny_lot.txt",
       "source": "file",
-      "evidence": "будьте на кладбище возле памятника Деметти",
+      "evidence": "На 3 февраля 2024 года в танках танкера «Морок» оставалось 940 литров пресной воды. Питьевую цистерну в тот день не пополняли.",
       "relevant_chunks": [
         {
-          "chunk_index": 12,
-          "chunk_sha256": "d5742f72b6dfef4ff9e8ed080bfdd89bc5f71045de06f7e74308f52bd8acb089"
+          "chunk_index": 28,
+          "chunk_sha256": "404dd1cb307d33704bd70debfa03d130d9f8f7ac83063a62bdcaa4816c1fe2e3"
         }
       ]
     },
     {
       "id": "q05",
-      "question": "На чем Старцев ездил к городским больным спустя четыре года после знакомства с Туркиными?",
-      "file": "ionych.txt",
+      "question": "Где лежит ключ от метеокассы?",
+      "file": "port_severny_lot.txt",
       "source": "file",
-      "evidence": "уезжал уже не на паре, а на тройке с бубенчиками",
+      "evidence": "Ключ от метеокассы лежит в ящике с меткой «сизый сургуч». Сама касса стоит за перегородкой радиорубки.",
       "relevant_chunks": [
         {
-          "chunk_index": 23,
-          "chunk_sha256": "89c53261a8f1ed71b20278cde8bda944471b53f238d34664a5931ef283d5a07f"
+          "chunk_index": 37,
+          "chunk_sha256": "326219d8662bffb790f7fada3e0fd214ed0be8ebc9bb5e591868c1d65c1abc26"
         }
       ]
     },
     {
       "id": "q06",
-      "question": "Что кричит Иван Петрович на вокзале, когда жена и дочь уезжают в Крым?",
-      "file": "ionych.txt",
+      "question": "Каким был лоцманский сбор баржи «Тихий клин» за март 2024 года?",
+      "file": "port_severny_lot.txt",
       "source": "file",
-      "evidence": "Провожая их на вокзале, Иван Петрович, когда трогается поезд, утирает слёзы и кричит",
+      "evidence": "Лоцманский сбор баржи «Тихий клин» за март 2024 года составил 18600 рублей. Счет выставили после ночной проводки, а не после дневной.",
       "relevant_chunks": [
         {
-          "chunk_index": 36,
-          "chunk_sha256": "b0fe0a387711ed6f6501b17619449ca2849efaf361427c7f4bb3ce58d0c3c8c3"
+          "chunk_index": 46,
+          "chunk_sha256": "dbd08ae474a0fda10485a58c4e655a4399ea9c2f4f7c9b18e8f8f5ba741424c1"
         }
       ]
     },
     {
       "id": "q07",
-      "question": "Какая собака бежала за невысокой блондинкой в берете по ялтинской набережной?",
-      "file": "dama_s_sobachkoy.txt",
+      "question": "Какую температуру круглые сутки держат в палате 12?",
+      "file": "klinika_bely_yar.txt",
       "source": "file",
-      "evidence": "за нею бежал белый шпиц",
+      "evidence": "В палате 12 круглые сутки держат 21.5 градуса. Если стрелка уходит ниже, дежурная сестра пишет отдельную строку, а не правит общую сводку.",
       "relevant_chunks": [
         {
           "chunk_index": 0,
-          "chunk_sha256": "b298e683d9378dd4024db185c389b6bb9665aefac5aef58c123dd5bd7cec084b"
+          "chunk_sha256": "bbf5a3a7179b3b6ccf55d3aad7021e7de1909c16e0f5c119df891d8b5f8f5fc4"
         }
       ]
     },
     {
       "id": "q08",
-      "question": "Как Гуров называл женщин, без чего, по его словам, не мог прожить и двух дней?",
-      "file": "dama_s_sobachkoy.txt",
+      "question": "Кто выдает ночные лекарства в клинике «Белый яр»?",
+      "file": "klinika_bely_yar.txt",
       "source": "file",
-      "evidence": "без «низшей расы» он не мог бы прожить и двух дней",
+      "evidence": "Ночные лекарства выдаёт фармацевт Злата Мирская. Дневной шкаф она не открывает и чужие бланки не подписывает.",
       "relevant_chunks": [
         {
-          "chunk_index": 2,
-          "chunk_sha256": "7ba6d1c59dc423b58c6df82e4932c86789e351f2eab5811c8eca807db2771763"
+          "chunk_index": 8,
+          "chunk_sha256": "692f72970b75658028a6a420654a97e2d1a60b87d1cac648156ca0748a5ec086"
         }
       ]
     },
     {
       "id": "q09",
-      "question": "Какое образование было у Гурова и где он служил?",
-      "file": "dama_s_sobachkoy.txt",
+      "question": "Какой код у шкафа с адреналином?",
+      "file": "klinika_bely_yar.txt",
       "source": "file",
-      "evidence": "по образованию филолог, но служит в банке",
+      "evidence": "Шкаф с адреналином открывается кодом 73-Иней. Код не совпадает с кодом ординаторской и с кодом подвала.",
       "relevant_chunks": [
         {
-          "chunk_index": 5,
-          "chunk_sha256": "0b3d9a974b7270669f3762fe1df727bccca85da7259983198cfc20776b74f217"
+          "chunk_index": 16,
+          "chunk_sha256": "9b284ada1ab3900cd8a85047fcde2ada9f1680f6c67cf748969f63c41e94d68f"
         }
       ]
     },
     {
       "id": "q10",
-      "question": "Каким словом Анна Сергеевна назвала мужа, когда объясняла Гурову, почему уехала одна?",
-      "file": "dama_s_sobachkoy.txt",
+      "question": "До которого часа донорская точка в подвале принимает кровь?",
+      "file": "klinika_bely_yar.txt",
       "source": "file",
-      "evidence": "Мой муж, быть может, честный, хороший человек, но ведь он лакей!",
+      "evidence": "Донорская точка в подвале принимает кровь только до 18:10. После этого часа пробы оставляют в холодильнике до утра.",
       "relevant_chunks": [
         {
-          "chunk_index": 10,
-          "chunk_sha256": "9003253007544f4e31bb4798632764d5e2e986a8f873bef39c1f6db83f1804d8"
+          "chunk_index": 24,
+          "chunk_sha256": "21c97440c62a2c7844e655f0613201089117c3077f80614ed732c36ef2d050aa"
         }
       ]
     },
     {
       "id": "q11",
-      "question": "Где на рассвете Гуров и Анна Сергеевна сидели и смотрели на море?",
-      "file": "dama_s_sobachkoy.txt",
+      "question": "Как часто калибруют аппарат «Вереск-2»?",
+      "file": "klinika_bely_yar.txt",
       "source": "file",
-      "evidence": "В Ореанде сидели на скамье, недалеко от церкви",
+      "evidence": "Аппарат «Вереск-2» калибруют каждые 9 суток. Пропущенный срок не заменяют устной отметкой врача.",
       "relevant_chunks": [
         {
-          "chunk_index": 12,
-          "chunk_sha256": "5d85ff3eab38617e68d2a7b48d6011454eaa853258cf45a15593d31af7aa19ea"
+          "chunk_index": 33,
+          "chunk_sha256": "a205a331068b3fef1c658e6cd3a1846556ca54f7a95282aea0e52ef3b5941273"
         }
       ]
     },
     {
       "id": "q12",
-      "question": "В какой московской гостинице останавливалась Анна Сергеевна, приезжая к Гурову?",
-      "file": "dama_s_sobachkoy.txt",
+      "question": "Что запретили пациентам корпуса Г с 11 марта 2023 года?",
+      "file": "klinika_bely_yar.txt",
       "source": "file",
-      "evidence": "останавливалась в «Славянском базаре»",
+      "evidence": "С 11 марта 2023 года пациентам корпуса Г запрещена валериана. Запрет подписал главврач, а не дежурный терапевт.",
       "relevant_chunks": [
         {
-          "chunk_index": 28,
-          "chunk_sha256": "7b384e3df5ba88596159d600836fedfedbaca5e5b370a49ce8f710da0ab6cbce"
+          "chunk_index": 42,
+          "chunk_sha256": "a6f4921daa638665ec6efacd3da2db677bfff7cd7d8fe2dbd02fd752910c379a"
         }
       ]
     },
     {
       "id": "q13",
-      "question": "В чем учитель греческого языка выходил на улицу даже в хорошую погоду?",
-      "file": "chelovek_v_futlyare.txt",
+      "question": "После какого пробега списывают вагон 214?",
+      "file": "park_lunnaya_petlya.txt",
       "source": "file",
-      "evidence": "даже в очень хорошую погоду, выходил в калошах и с зонтиком и непременно в тёплом пальто на вате",
+      "evidence": "Вагон 214 списывают после пробега 620000 километров. До этой отметки его чинят в том же стойле, где ставят учебные вагоны.",
       "relevant_chunks": [
         {
-          "chunk_index": 1,
-          "chunk_sha256": "5a82a7ec3c4e0753b893293fdb7576a08765c59cd7e0381199ee026400c12677"
+          "chunk_index": 0,
+          "chunk_sha256": "d9bcbc83ebf9bd0d3116497adba3feb36044277528028b28f0344e5b0b7df295"
         }
       ]
     },
     {
       "id": "q14",
-      "question": "Какую еду Беликов выбрал, чтобы ее нельзя было счесть ни постной, ни скоромной?",
-      "file": "chelovek_v_futlyare.txt",
+      "question": "Кто ведет утреннюю смену диспетчерской?",
+      "file": "park_lunnaya_petlya.txt",
       "source": "file",
-      "evidence": "ел судака на коровьем масле",
+      "evidence": "Утреннюю смену диспетчерской ведет Прохор Селиванов. Вечернюю смену он не подменяет и ключ от радиоузла не забирает домой.",
       "relevant_chunks": [
         {
-          "chunk_index": 6,
-          "chunk_sha256": "7e0155e655ded69b6d20d9838eba17029790769f03d943759c5d2918e3defb09"
+          "chunk_index": 8,
+          "chunk_sha256": "9225c4e1908a8724968631c2480877201d2d74786f3c1b48b08ebd7bf8961369"
         }
       ]
     },
     {
       "id": "q15",
-      "question": "Почему Беликов не держал горничную и кто ему стряпал?",
-      "file": "chelovek_v_futlyare.txt",
+      "question": "Когда заменили контактный провод на кольце «Моховое»?",
+      "file": "park_lunnaya_petlya.txt",
       "source": "file",
-      "evidence": "Женской прислуги он не держал из страха",
+      "evidence": "Контактный провод на кольце «Моховое» заменили 8 августа 2021 года. Старый провод сдали в лом отдельно от медных вставок.",
       "relevant_chunks": [
         {
-          "chunk_index": 6,
-          "chunk_sha256": "7e0155e655ded69b6d20d9838eba17029790769f03d943759c5d2918e3defb09"
+          "chunk_index": 15,
+          "chunk_sha256": "ffc2877301676704ed2556b376091cb9db29472003f22aaa824b4f983c46b5d8"
         }
       ]
     },
     {
       "id": "q16",
-      "question": "Кто приехал в город вместе с новым учителем истории и географии Михаилом Саввичем Коваленко?",
-      "file": "chelovek_v_futlyare.txt",
+      "question": "Сколько стоит билет контролера серии «Омела»?",
+      "file": "park_lunnaya_petlya.txt",
       "source": "file",
-      "evidence": "Приехал он не один, а с сестрой Варенькой",
+      "evidence": "Билет контролера серии «Омела» стоит 47 рублей. Его не путают с абонементом водителя и не продают в кассе конечной.",
       "relevant_chunks": [
         {
-          "chunk_index": 8,
-          "chunk_sha256": "14b8e76e83c7ffc51b5cfea166fdfd1c5f13ac1b01eb9ef7f0ea76057acaae36"
+          "chunk_index": 23,
+          "chunk_sha256": "7f2a40b5c983bbc42761dce9bffc444cc0e3f25349a882c327e5300468e0fdcc"
         }
       ]
     },
     {
       "id": "q17",
-      "question": "Какая подпись была на карикатуре, где Беликов шел под руку с Варенькой?",
-      "file": "chelovek_v_futlyare.txt",
+      "question": "Во сколько запирают депо и какой код у калитки?",
+      "file": "park_lunnaya_petlya.txt",
       "source": "file",
-      "evidence": "влюблённый антропос",
+      "evidence": "Депо запирают в 00:40, а код калитки — 5528. Охранник называет код только сменщику, не бригадиру маршрута.",
       "relevant_chunks": [
         {
-          "chunk_index": 15,
-          "chunk_sha256": "4440fafd39e8577660e06058bcb818c20e91f1869a6846d61348c68c9935a4a2"
+          "chunk_index": 30,
+          "chunk_sha256": "bd97a679f8746412f515d198627e615a2e53bb594bea38f17d3058489e681902"
         }
       ]
     },
     {
       "id": "q18",
-      "question": "Что Беликов счел неприличным для преподавателей и женщин, когда увидел Коваленко с сестрой на улице?",
-      "file": "chelovek_v_futlyare.txt",
+      "question": "Где зимой заканчивается маршрут 9?",
+      "file": "park_lunnaya_petlya.txt",
       "source": "file",
-      "evidence": "Разве преподавателям гимназии и женщинам прилично ездить на велосипеде?",
+      "evidence": "Зимой маршрут 9 заканчивается на остановке «Старые плиты». Летом конечная другая, и зимнее табло на нее не переключают.",
       "relevant_chunks": [
         {
-          "chunk_index": 16,
-          "chunk_sha256": "331eeca9e464d7c8b14918dba447034f4a69442f23c9ecfad67c5e73f5ad8719"
+          "chunk_index": 38,
+          "chunk_sha256": "e4ee9076f3879fbe05926fa36d1e8d6c614333d8dd3b5aa9004d3cb14da7fc5b"
         }
       ]
     },
     {
       "id": "q19",
-      "question": "Как называлось имение, куда Буркин и Иван Иваныч зашли переждать дождь?",
-      "file": "kryzhovnik.txt",
+      "question": "Как поливают мох сорта «Седой ковер»?",
+      "file": "sad_lunnye_gryady.txt",
       "source": "file",
-      "evidence": "Это было Софьино, где жил Алёхин",
+      "evidence": "Мох сорта «Седой ковер» поливают 130 миллилитрами раз в 4 дня. Лить больше запрещено: дернина начинает киснуть.",
       "relevant_chunks": [
         {
-          "chunk_index": 1,
-          "chunk_sha256": "a12888da8d4e3c6a73a75778fcaf6ec8919157f8ded1bce2fdaf347661219efd"
+          "chunk_index": 0,
+          "chunk_sha256": "ae7c4fb9716e1619a97cc416ab6ce75aed99d63853e89cdaba0e85a417570a1b"
         }
       ]
     },
     {
       "id": "q20",
-      "question": "Кем работали Иван Иваныч и его младший брат Николай?",
-      "file": "kryzhovnik.txt",
+      "question": "Выше какой температуры нельзя прогревать оранжерею 3?",
+      "file": "sad_lunnye_gryady.txt",
       "source": "file",
-      "evidence": "стал ветеринаром, а Николай уже с девятнадцати лет сидел в казённой палате",
+      "evidence": "Оранжерею 3 нельзя прогревать выше 16 градусов. Ночной сторож записывает пик, даже если утром уже прохладно.",
       "relevant_chunks": [
         {
-          "chunk_index": 6,
-          "chunk_sha256": "2a68f160f7a98e3a0961503319dfde730bc048c55329d7b8c2e9878ff193db40"
+          "chunk_index": 7,
+          "chunk_sha256": "832ac259fc68916283899f8dee3fa934250c032b9750404e459a5f978ab9a3b8"
         }
       ]
     },
     {
       "id": "q21",
-      "question": "На ком и ради чего женился Николай Иваныч?",
-      "file": "kryzhovnik.txt",
+      "question": "Кто хранит семена папоротника «Тихий веер»?",
+      "file": "sad_lunnye_gryady.txt",
       "source": "file",
-      "evidence": "женился на старой, некрасивой вдове, без всякого чувства, а только потому, что у неё водились деньжонки",
+      "evidence": "Семена папоротника «Тихий веер» хранит ботаник Ника Волгина. В общий семенной шкаф их не пересыпают.",
       "relevant_chunks": [
         {
-          "chunk_index": 10,
-          "chunk_sha256": "d66d53ec2e876adc6056559efd523e178565ef90d7a9c42fd9a8a39b94e006eb"
+          "chunk_index": 14,
+          "chunk_sha256": "da1caf93e596499877ec88cae60a4625a00d211e9a58a2aff61647509212570e"
         }
       ]
     },
     {
       "id": "q22",
-      "question": "Сколько десятин купил Николай Иваныч и был ли там крыжовник сразу после покупки?",
-      "file": "kryzhovnik.txt",
+      "question": "Когда открывается ярмарка сада в поселке Репейное?",
+      "file": "sad_lunnye_gryady.txt",
       "source": "file",
-      "evidence": "купил сто двенадцать десятин с барским домом, с людской, с парком, но ни фруктового сада, ни крыжовника",
+      "evidence": "Ярмарка сада в поселке Репейное открывается в первую субботу сентября. Ее не переносят на воскресенье даже в дождь.",
       "relevant_chunks": [
         {
-          "chunk_index": 11,
-          "chunk_sha256": "539721e41a6dfe665b4a4ad843a8f711d2f829d51aae3f43e0740b1f960869a8"
+          "chunk_index": 20,
+          "chunk_sha256": "0202762d314c49260b76356e1cb901b86fa3c7b321e717137944c7be1bb7d3d2"
         }
       ]
     },
     {
       "id": "q23",
-      "question": "Какими на вкус оказались ягоды с кустов, которые Николай Иваныч посадил сам?",
-      "file": "kryzhovnik.txt",
+      "question": "После какой даты гряды уже не обрабатывают медным купоросом?",
+      "file": "sad_lunnye_gryady.txt",
       "source": "file",
-      "evidence": "Было жёстко и кисло",
+      "evidence": "После 2 июля гряды медным купоросом не обрабатывают. Более ранние опрыскивания в журнале остаются действительными.",
       "relevant_chunks": [
         {
-          "chunk_index": 15,
-          "chunk_sha256": "d9452101c1dd080f454e45c46716b6fd508266773317f8ccf75f1ae491ee7c79"
+          "chunk_index": 27,
+          "chunk_sha256": "cc79c4147f386efac280d6cd0c6dc885f6933b0d32371d4e126f2c868a9ceb49"
         }
       ]
     },
     {
       "id": "q24",
-      "question": "Кто, по словам Ивана Иваныча, должен стоять за дверью довольного человека и о чем напоминать?",
-      "file": "kryzhovnik.txt",
+      "question": "Когда в саду «Лунные гряды» пчелам открывают леток?",
+      "file": "sad_lunnye_gryady.txt",
       "source": "file",
-      "evidence": "за дверью каждого довольного, счастливого человека стоял кто-нибудь с молоточком",
+      "evidence": "Леток пчелам открывают, когда зацветает груша «Ночной мед». До этого цвета ульи оставляют закрытыми.",
       "relevant_chunks": [
         {
-          "chunk_index": 16,
-          "chunk_sha256": "81f7f93277cc23ae6e645d1198402603869c6e62b9fd176c23d4123dc7299a63"
+          "chunk_index": 34,
+          "chunk_sha256": "90888b61841935d38c82840910ebe99c87fa8969c2ea3b1c65d312ba7cc7e4d6"
         }
       ]
     },
     {
       "id": "q25",
-      "question": "Как выглядел неприметный чиновник, служивший в одном департаменте?",
-      "file": "shinel.txt",
+      "question": "До какой температуры разогревают печь «Ключ-4»?",
+      "file": "masterskaya_siny_klyuch.txt",
       "source": "file",
-      "evidence": "низенького роста, несколько рябоват, несколько рыжеват, несколько даже на-вид подслеповат",
+      "evidence": "Печь «Ключ-4» разогревают до 1175 градусов. Ниже этой отметки стекло для блюд не набирают.",
       "relevant_chunks": [
         {
           "chunk_index": 0,
-          "chunk_sha256": "386948a7ac79b2b293fcb5d941c8b62cf3a82069d5e611e9dddfbab5a58413c4"
+          "chunk_sha256": "ddf45f6f48cdbdf9538bbd1719f4d0732b170cb35b5a0063c18031ece7b03b08"
         }
       ]
     },
     {
       "id": "q26",
-      "question": "Что Акакий Акакиевич ел дома, не замечая вкуса?",
-      "file": "shinel.txt",
+      "question": "Кто по вторникам ведет смену в мастерской «Синий ключ»?",
+      "file": "masterskaya_siny_klyuch.txt",
       "source": "file",
-      "evidence": "хлебал наскоро свои щи и ел кусок говядины с луком",
+      "evidence": "По вторникам смену ведет мастер Аглая Ремезова. В остальные дни она стоит у отжига, а не у набора.",
       "relevant_chunks": [
         {
-          "chunk_index": 9,
-          "chunk_sha256": "ffcd8bc0d811b3ecaadbaadba9b9c0b89150e842c8e0891de172002873891a8f"
+          "chunk_index": 8,
+          "chunk_sha256": "1f2b4e8a6f2ecdb297b477038e3726f3fb9042d0e19549f3bf2a40b8fbc5835c"
         }
       ]
     },
     {
       "id": "q27",
-      "question": "Какую цену Петрович назвал за новую шинель, после чего Акакий Акакиевич вскрикнул?",
-      "file": "shinel.txt",
+      "question": "В какой пропорции смешивают кобальтовую краску?",
+      "file": "masterskaya_siny_klyuch.txt",
       "source": "file",
-      "evidence": "Полтораста рублей за шинель",
+      "evidence": "Кобальтовую краску смешивают в пропорции 1 к 23. Другую краску этой меркой не разводят.",
       "relevant_chunks": [
         {
-          "chunk_index": 21,
-          "chunk_sha256": "cfa442a3b60090b6b077f3d8dd6bb39dfa650d1fe277f22f61fbfcea1ea8e05c"
+          "chunk_index": 16,
+          "chunk_sha256": "77dc79d76318d10ba764150bd495daa6bf6d96799d785d92a4197b3b46bec399"
         }
       ]
     },
     {
       "id": "q28",
-      "question": "Чем Петрович предлагал отделать воротник, из-за чего шинель стала бы еще дороже?",
-      "file": "shinel.txt",
+      "question": "Сколько длится отжиг блюда «Омуль» и при какой температуре?",
+      "file": "masterskaya_siny_klyuch.txt",
       "source": "file",
-      "evidence": "Если положить на воротник куницу",
+      "evidence": "Отжиг блюда «Омуль» длится 5 часов при 510 градусах. Сокращать выдержку из-за очереди театра нельзя.",
       "relevant_chunks": [
         {
-          "chunk_index": 21,
-          "chunk_sha256": "cfa442a3b60090b6b077f3d8dd6bb39dfa650d1fe277f22f61fbfcea1ea8e05c"
+          "chunk_index": 25,
+          "chunk_sha256": "62bedee5787c9bc17ad00834f16f5ab2860892365e43711eaeab472285f5bd21"
         }
       ]
     },
     {
       "id": "q29",
-      "question": "Что сделали с Акакием Акакиевичем люди с усами на пустой площади?",
-      "file": "shinel.txt",
+      "question": "Сколько плафонов и к какой дате заказал театр «Пыльная рампа»?",
+      "file": "masterskaya_siny_klyuch.txt",
       "source": "file",
-      "evidence": "сняли с него шинель, дали ему пинка коленом, и он упал навзничь в снег",
+      "evidence": "Театр «Пыльная рампа» заказал 27 плафонов к 17 января. Заказ не включает ночники и настенные бра.",
       "relevant_chunks": [
         {
-          "chunk_index": 41,
-          "chunk_sha256": "20849c218e0faade6ebdb3716c2b5b2d92d2a3615e2455a9959d1dab19815030"
+          "chunk_index": 33,
+          "chunk_sha256": "5b7abdf406524d5fd566369f9c314e862d140268d62d36ac8a9661374715afe0"
         }
       ]
     },
     {
       "id": "q30",
-      "question": "Кого, по городским слухам, видели ночью у Калинкина моста и что он снимал с прохожих?",
-      "file": "shinel.txt",
+      "question": "Откуда мастерская «Синий ключ» берет песок?",
+      "file": "masterskaya_siny_klyuch.txt",
       "source": "file",
-      "evidence": "у Калинкина моста и далеко подальше стал показываться по ночам мертвец",
+      "evidence": "Песок берут только из карьера у деревни Сухое Лоно. Речной песок с соседней пристани в шихту не кладут.",
       "relevant_chunks": [
         {
-          "chunk_index": 57,
-          "chunk_sha256": "b8716f55081b26ca832742227a18986453187791f4f9b8fce7dc5972a28271d5"
+          "chunk_index": 41,
+          "chunk_sha256": "fd1f6836f1b531aacf2fbe1044c56c98dbf19a75539fb324c03945709726c13c"
+        }
+      ]
+    },
+    {
+      "id": "q31",
+      "question": "Какой уровень потерь здоровых лет на 100 тысяч населения обзор указывает для России?",
+      "file": "healthcare_research.md",
+      "source": "file",
+      "evidence": "Россия (показатель около 29 485 DALY на 100 тыс. населения).",
+      "relevant_chunks": [
+        {
+          "chunk_index": 4,
+          "chunk_sha256": "a4409e6bc8182f22ffedb11613292a392d210217b6b7bc454adde2f670d9562c"
+        }
+      ]
+    },
+    {
+      "id": "q32",
+      "question": "В каком диапазоне шкалы от нуля до ста обзор помещает Россию по индексу доступа и качества помощи?",
+      "file": "healthcare_research.md",
+      "source": "file",
+      "evidence": "Россия в этом индексе занимает срединную позицию (порядка 55–65 баллов)",
+      "relevant_chunks": [
+        {
+          "chunk_index": 5,
+          "chunk_sha256": "0eb7d41b327248d6b25c2952f21867bb2d883c14b1c3e4210b98815159976144"
+        }
+      ]
+    },
+    {
+      "id": "q33",
+      "question": "Насколько Россия готова к биологической угрозе?",
+      "file": "healthcare_research.md",
+      "source": "file",
+      "evidence": "Относится ко 2-й группе стран с умеренно высокой готовностью (диапазон 40–59 баллов).",
+      "relevant_chunks": [
+        {
+          "chunk_index": 7,
+          "chunk_sha256": "87d595da474cc09b8af96695c718fd5287eea48b146417efa98aebce82ca1422"
+        }
+      ]
+    },
+    {
+      "id": "q34",
+      "question": "Какое место Россия занимает в подразделе здоровья индекса Legatum?",
+      "file": "healthcare_research.md",
+      "source": "file",
+      "evidence": "Россия занимает **60-е место из 161**.",
+      "relevant_chunks": [
+        {
+          "chunk_index": 8,
+          "chunk_sha256": "2c1c0f9c24d7650d3fc0a3b43af205747ba920a997d45672375a6667c62b925e"
+        }
+      ]
+    },
+    {
+      "id": "q35",
+      "question": "Сколько баллов у России по охвату мед услугами?",
+      "file": "healthcare_research.md",
+      "source": "file",
+      "evidence": "**Россия: 81 балл из 100**",
+      "relevant_chunks": [
+        {
+          "chunk_index": 9,
+          "chunk_sha256": "7f9807bf493bb741486a05ccf42ad1f2137f643fa33ffd1f78e4d0bdc8d5ec14"
+        }
+      ]
+    },
+    {
+      "id": "q36",
+      "question": "Возраст дожития при рождении в России",
+      "file": "healthcare_research.md",
+      "source": "file",
+      "evidence": "в районе 73 с половиной лет",
+      "relevant_chunks": [
+        {
+          "chunk_index": 10,
+          "chunk_sha256": "dca4a0805ec29b75c6fc5a3a4d07a75bfb4f3310d46f5bd993796e925121731e"
+        }
+      ]
+    },
+    {
+      "id": "q37",
+      "question": "Сколько от ВВП Россия тратит на медицину",
+      "file": "healthcare_research.md",
+      "source": "file",
+      "evidence": "суммарно составляют порядка 7% ВВП по последним актуальным данных Всемирного Банка",
+      "relevant_chunks": [
+        {
+          "chunk_index": 11,
+          "chunk_sha256": "f1b10156c547d82f7ebb6c0635a4a59bee06d5c0f73aef696540b350ca5fbaf1"
+        }
+      ]
+    },
+    {
+      "id": "q38",
+      "question": "Соотношение частных и гос медицинских учреждений",
+      "file": "healthcare_research.md",
+      "source": "file",
+      "evidence": "около **75.6% зарегистрированных медицинских организаций — частные**",
+      "relevant_chunks": [
+        {
+          "chunk_index": 14,
+          "chunk_sha256": "cfcbe6b63e47aeb0d6a4a2f8bd1f459260dd3f01ee123b7f15e21738badb6514"
+        }
+      ]
+    },
+    {
+      "id": "q39",
+      "question": "Размер государственных расходов на здравоохранение в 2025 году",
+      "file": "healthcare_research.md",
+      "source": "file",
+      "evidence": "чистые расходы за вычетом межбюджетных трансфертов — 7.86 трлн руб.",
+      "relevant_chunks": [
+        {
+          "chunk_index": 17,
+          "chunk_sha256": "7dd28f4671ab1db18b863d83c63c4396b2fa57bc0af9511d09b51343f335bb19"
+        }
+      ]
+    },
+    {
+      "id": "q40",
+      "question": "До какой величины сокращен бюджет федерального проекта по онкологи?",
+      "file": "healthcare_research.md",
+      "source": "file",
+      "evidence": "снижено до 44,9 млрд руб.",
+      "relevant_chunks": [
+        {
+          "chunk_index": 32,
+          "chunk_sha256": "069bc4b5e2f1544f3b73804d64336f7e8dddc3f00a6143d3397c01580debbb53"
         }
       ]
     }

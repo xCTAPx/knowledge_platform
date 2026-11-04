@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -10,7 +10,7 @@ from app.api.v1.paging import Page, page_limit, sliced
 from app.core.database import get_db
 from app.core.security import require_auth
 from app.core.uploads import file_response, store_upload, unlink
-from app.core.vectors import drop_file, drop_note, index_file, index_note
+from app.core.vectors import conceal, drop_file, drop_note, index_file, index_note, reveal
 from app.models.file import File
 from app.models.note import Note
 from app.models.user import User
@@ -79,15 +79,29 @@ def update_note(note_id: int, data: NoteIn, user: User = Depends(require_auth), 
 
 
 @router.delete("/notes/{note_id}")
-def delete_note(note_id: int, user: User = Depends(require_auth), db: Session = Depends(get_db)):
+def delete_note(
+    note_id: int,
+    background: BackgroundTasks,
+    user: User = Depends(require_auth),
+    db: Session = Depends(get_db),
+):
     note = _owned(note_id, user, db)
-    file_ids = [item.id for item in note.files]
-    for item in list(note.files):
-        unlink(item.stored)
-        db.delete(item)
-    db.delete(note)
-    db.commit()
-    drop_note(user.id, note_id, file_ids)
+    file_ids: list[int] = []
+    conceal(user.id, "note", note_id)
+    try:
+        for item in list(note.files):
+            file_ids.append(item.id)
+            conceal(user.id, "file", item.id)
+            unlink(item.stored)
+            db.delete(item)
+        db.delete(note)
+        db.commit()
+    except Exception:
+        reveal(user.id, "note", note_id)
+        for file_id in file_ids:
+            reveal(user.id, "file", file_id)
+        raise
+    background.add_task(drop_note, user.id, note_id, file_ids)
 
 
 @router.post("/notes/{note_id}/files", response_model=FileOut)
@@ -112,13 +126,24 @@ def get_file(note_id: int, file_id: int, user: User = Depends(require_auth), db:
 
 
 @router.delete("/notes/{note_id}/files/{file_id}")
-def delete_file(note_id: int, file_id: int, user: User = Depends(require_auth), db: Session = Depends(get_db)):
+def delete_file(
+    note_id: int,
+    file_id: int,
+    background: BackgroundTasks,
+    user: User = Depends(require_auth),
+    db: Session = Depends(get_db),
+):
     note = _owned(note_id, user, db)
     row = db.get(File, file_id)
     if not row or row.note_id != note.id:
         raise HTTPException(404, "File not found")
-    file_id = row.id
-    unlink(row.stored)
-    db.delete(row)
-    db.commit()
-    drop_file(user.id, file_id)
+    target = row.id
+    conceal(user.id, "file", target)
+    try:
+        unlink(row.stored)
+        db.delete(row)
+        db.commit()
+    except Exception:
+        reveal(user.id, "file", target)
+        raise
+    background.add_task(drop_file, user.id, target)

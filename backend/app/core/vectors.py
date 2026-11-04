@@ -1,3 +1,5 @@
+import logging
+import threading
 from dataclasses import dataclass
 from uuid import uuid4
 
@@ -17,7 +19,44 @@ COLLECTION = "chunks"
 DIM = 1024
 TOP_K = 5
 
+log = logging.getLogger(__name__)
 _client: QdrantClient | None = None
+_hidden: set[tuple[int, str, int]] = set()
+_hidden_lock = threading.Lock()
+
+
+def conceal(user_id: int, source: str, item_id: int) -> None:
+    with _hidden_lock:
+        _hidden.add((user_id, source, item_id))
+
+
+def reveal(user_id: int, source: str, item_id: int) -> None:
+    with _hidden_lock:
+        _hidden.discard((user_id, source, item_id))
+
+
+def _concealed(user_id: int, source: str, item_id: int | None) -> bool:
+    if item_id is None:
+        return False
+    with _hidden_lock:
+        return (user_id, source, item_id) in _hidden
+
+
+def _excluded(user_id: int) -> list[Filter]:
+    with _hidden_lock:
+        pending = [item for item in _hidden if item[0] == user_id]
+    excluded: list[Filter] = []
+    for _owner, source, item_id in pending:
+        field = "file_id" if source == "file" else "note_id"
+        excluded.append(
+            Filter(
+                must=[
+                    FieldCondition(key="source", match=MatchValue(value=source)),
+                    FieldCondition(key=field, match=MatchValue(value=item_id)),
+                ]
+            )
+        )
+    return excluded
 
 
 def _qdrant() -> QdrantClient:
@@ -86,15 +125,25 @@ def index_file(item: File) -> None:
 
 
 def drop_note(user_id: int, note_id: int, file_ids: list[int]) -> None:
-    ensure_collection()
-    _delete(user_id, "note", "note_id", note_id)
+    try:
+        ensure_collection()
+        _delete(user_id, "note", "note_id", note_id)
+    except Exception:
+        log.exception("failed to drop note %s from qdrant", note_id)
+    else:
+        reveal(user_id, "note", note_id)
     for file_id in file_ids:
-        _delete(user_id, "file", "file_id", file_id)
+        drop_file(user_id, file_id)
 
 
 def drop_file(user_id: int, file_id: int) -> None:
-    ensure_collection()
-    _delete(user_id, "file", "file_id", file_id)
+    try:
+        ensure_collection()
+        _delete(user_id, "file", "file_id", file_id)
+    except Exception:
+        log.exception("failed to drop file %s from qdrant", file_id)
+        return
+    reveal(user_id, "file", file_id)
 
 
 @dataclass(frozen=True)
@@ -113,10 +162,14 @@ def search_chunks(query: str, user_id: int) -> list[ChunkHit]:
     if not text:
         return []
     ensure_collection()
+    excluded = _excluded(user_id)
     found = _qdrant().query_points(
         collection_name=COLLECTION,
         query=embed([text])[0],
-        query_filter=Filter(must=[FieldCondition(key="user_id", match=MatchValue(value=user_id))]),
+        query_filter=Filter(
+            must=[FieldCondition(key="user_id", match=MatchValue(value=user_id))],
+            must_not=excluded or None,
+        ),
         limit=TOP_K,
         with_payload=True,
     ).points
@@ -128,15 +181,20 @@ def search_chunks(query: str, user_id: int) -> list[ChunkHit]:
             continue
         note_id = payload.get("note_id")
         file_id = payload.get("file_id")
+        source = str(payload.get("source") or "")
+        note_key = int(note_id) if note_id is not None else None
+        file_key = int(file_id) if file_id is not None else None
+        if _concealed(user_id, "file", file_key) or (source == "note" and _concealed(user_id, "note", note_key)):
+            continue
         hits.append(
             ChunkHit(
                 rank=len(hits) + 1,
                 score=float(point.score),
                 text=str(body),
-                source=str(payload.get("source") or ""),
+                source=source,
                 title=str(payload.get("title") or ""),
-                note_id=int(note_id) if note_id is not None else None,
-                file_id=int(file_id) if file_id is not None else None,
+                note_id=note_key,
+                file_id=file_key,
             )
         )
     return hits

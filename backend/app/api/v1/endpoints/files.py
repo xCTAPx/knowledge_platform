@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -9,7 +9,7 @@ from app.api.v1.paging import Page, page_limit, sliced
 from app.core.database import get_db
 from app.core.security import require_auth
 from app.core.uploads import file_response, store_upload, unlink
-from app.core.vectors import drop_file, index_file
+from app.core.vectors import conceal, drop_file, index_file, reveal
 from app.models.file import File
 from app.models.user import User
 
@@ -63,10 +63,20 @@ def get_file(file_id: int, user: User = Depends(require_auth), db: Session = Dep
 
 
 @router.delete("/files/{file_id}")
-def delete_file(file_id: int, user: User = Depends(require_auth), db: Session = Depends(get_db)):
+def delete_file(
+    file_id: int,
+    background: BackgroundTasks,
+    user: User = Depends(require_auth),
+    db: Session = Depends(get_db),
+):
     row = _owned_file(file_id, user, db)
-    file_id = row.id
-    unlink(row.stored)
-    db.delete(row)
-    db.commit()
-    drop_file(user.id, file_id)
+    target = row.id
+    conceal(user.id, "file", target)
+    try:
+        unlink(row.stored)
+        db.delete(row)
+        db.commit()
+    except Exception:
+        reveal(user.id, "file", target)
+        raise
+    background.add_task(drop_file, user.id, target)
