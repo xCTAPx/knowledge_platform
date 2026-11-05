@@ -17,8 +17,6 @@ from app.models.note import Note
 
 COLLECTION = "chunks"
 DIM = 1024
-TOP_K = 5
-
 log = logging.getLogger(__name__)
 _client: QdrantClient | None = None
 _hidden: set[tuple[int, str, int]] = set()
@@ -157,46 +155,75 @@ class ChunkHit:
     file_id: int | None
 
 
-def search_chunks(query: str, user_id: int) -> list[ChunkHit]:
+def _user_filter(user_id: int) -> Filter:
+    excluded = _excluded(user_id)
+    return Filter(
+        must=[FieldCondition(key="user_id", match=MatchValue(value=user_id))],
+        must_not=excluded or None,
+    )
+
+
+def _visible_hit(user_id: int, payload: dict | None, score: float) -> ChunkHit | None:
+    payload = payload or {}
+    body = payload.get("text")
+    if not body:
+        return None
+    note_id = payload.get("note_id")
+    file_id = payload.get("file_id")
+    source = str(payload.get("source") or "")
+    note_key = int(note_id) if note_id is not None else None
+    file_key = int(file_id) if file_id is not None else None
+    if _concealed(user_id, "file", file_key) or (source == "note" and _concealed(user_id, "note", note_key)):
+        return None
+    return ChunkHit(
+        rank=0,
+        score=score,
+        text=str(body),
+        source=source,
+        title=str(payload.get("title") or ""),
+        note_id=note_key,
+        file_id=file_key,
+    )
+
+
+def user_chunks(user_id: int) -> list[ChunkHit]:
+    hits: list[ChunkHit] = []
+    offset = None
+    while True:
+        records, offset = _qdrant().scroll(
+            collection_name=COLLECTION,
+            scroll_filter=_user_filter(user_id),
+            limit=256,
+            offset=offset,
+            with_payload=True,
+            with_vectors=False,
+        )
+        for record in records:
+            hit = _visible_hit(user_id, record.payload, 0.0)
+            if hit is not None:
+                hits.append(hit)
+        if offset is None:
+            break
+    return hits
+
+
+def nearest_chunks(query: str, user_id: int, limit: int) -> list[ChunkHit]:
     text = query.strip()
     if not text:
         return []
     ensure_collection()
-    excluded = _excluded(user_id)
     found = _qdrant().query_points(
         collection_name=COLLECTION,
         query=embed([text])[0],
-        query_filter=Filter(
-            must=[FieldCondition(key="user_id", match=MatchValue(value=user_id))],
-            must_not=excluded or None,
-        ),
-        limit=TOP_K,
+        query_filter=_user_filter(user_id),
+        limit=limit,
         with_payload=True,
     ).points
     hits: list[ChunkHit] = []
     for point in found:
-        payload = point.payload or {}
-        body = payload.get("text")
-        if not body:
-            continue
-        note_id = payload.get("note_id")
-        file_id = payload.get("file_id")
-        source = str(payload.get("source") or "")
-        note_key = int(note_id) if note_id is not None else None
-        file_key = int(file_id) if file_id is not None else None
-        if _concealed(user_id, "file", file_key) or (source == "note" and _concealed(user_id, "note", note_key)):
-            continue
-        hits.append(
-            ChunkHit(
-                rank=len(hits) + 1,
-                score=float(point.score),
-                text=str(body),
-                source=source,
-                title=str(payload.get("title") or ""),
-                note_id=note_key,
-                file_id=file_key,
-            )
-        )
+        hit = _visible_hit(user_id, point.payload, float(point.score))
+        if hit is not None:
+            hits.append(hit)
     return hits
 
 

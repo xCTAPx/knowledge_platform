@@ -1,4 +1,4 @@
-from app.core.vectors import search_chunks
+from app.core.search import search_chunks
 from app.models.user import User
 
 

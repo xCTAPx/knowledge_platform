@@ -7,12 +7,14 @@ from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.core.embeddings import load_embedder
+from app.core.rerank import load_reranker
 from app.core.vectors import backfill_library
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     load_embedder()
+    load_reranker()
     db = SessionLocal()
     try:
         backfill_library(db)

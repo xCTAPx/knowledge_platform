@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     llm_api_key: str = ""
     llm_model: str = "openai/gpt-4o-mini"
     embed_model: str = "BAAI/bge-m3"
+    rerank_model: str = "BAAI/bge-reranker-v2-m3"
     qdrant_url: str = "http://localhost:6333"
 
 

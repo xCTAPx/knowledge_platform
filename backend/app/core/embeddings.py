@@ -1,5 +1,7 @@
 from FlagEmbedding import BGEM3FlagModel
+
 from app.core.config import settings
+from app.core.inference import DEVICE, EMBED_BATCH_SIZE, EMBED_MAX_LENGTH, USE_FP16
 
 _model: BGEM3FlagModel | None = None
 
@@ -9,9 +11,10 @@ def load_embedder() -> BGEM3FlagModel:
     if _model is None:
         _model = BGEM3FlagModel(
             settings.embed_model,
-            use_fp16=True,
-            devices="cuda:0",
-            passage_max_length=2048,
+            use_fp16=USE_FP16,
+            devices=DEVICE,
+            batch_size=EMBED_BATCH_SIZE,
+            passage_max_length=EMBED_MAX_LENGTH,
         )
         _model.model.to("cuda:0")
     return _model

@@ -2,11 +2,11 @@
 
 A personal library with a chat over your own notes and files.
 
-You register, keep notes and attachments in one tape, and ask questions in a saved chat. The answer is streamed from an OpenAI-compatible LLM. Before the call, the question is embedded and the five nearest chunks from your library are added to the prompt.
+You register, keep notes and attachments in one tape, and ask questions in a saved chat. The answer is streamed from an OpenAI-compatible LLM. Before the call, dense search and BM25 each propose twenty chunks. The reranker reads the combined list, and the top five are added to the prompt.
 
 - Backend: FastAPI, PostgreSQL, Qdrant
 - Frontend: React, TypeScript, Vite
-- Embeddings: `BAAI/bge-m3` on CUDA
+- Embeddings: `BAAI/bge-m3` on CUDA, then `BAAI/bge-reranker-v2-m3`
 
 ## Requirements
 
@@ -14,7 +14,7 @@ You register, keep notes and attachments in one tape, and ask questions in a sav
 - Node.js 18+
 - PostgreSQL
 - Docker, for Qdrant
-- An NVIDIA GPU. The embedder is loaded on `cuda:0` when the API starts
+- An NVIDIA GPU. The embedder and reranker are loaded on `cuda:0` when the API starts
 
 ## Backend
 
@@ -69,4 +69,4 @@ Upload those files into the library of the user you want to score, then from `ba
 .venv\Scripts\python.exe ..\rag_eval\evaluate.py --user-id 1
 ```
 
-The script calls the same search the chat uses. Hit@5 is the share of questions whose labeled chunk appears in the five results. MRR@5 is the average of `1 / rank` for the first labeled chunk, or 0 when it is missing.
+The script calls the same search the chat uses, including BM25 and the reranker. Hit@5 is the share of questions whose labeled chunk appears in the five results. MRR@5 is the average of `1 / rank` for the first labeled chunk, or 0 when it is missing. Latency is how long that search takes after one warmup query, not the time until the model finishes an answer. `--save` appends that summary to `rag_eval/benchmarks.md`; `--message` is an optional note above it. Without `--save` nothing is written to a file.
