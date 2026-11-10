@@ -7,7 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal, get_db
-from app.core.library import library_excerpts
+from app.core.library import library_excerpts, library_prompt
 from app.core.llm import complete, stream
 from app.core.security import require_auth
 from app.models.conversation import Conversation, ConversationMessage
@@ -145,7 +145,7 @@ def send_message(conversation_id: int, data: MessageIn, user: User = Depends(req
         .limit(HISTORY)
     ).all()[::-1]
     chat = "\n".join(f"{msg.role}: {msg.text}" for msg in prior)
-    prompt = f"Chat:\n{chat}\n\nLibrary:\n{library_excerpts(text, user)}"
+    prompt = library_prompt(chat, library_excerpts(text, user))
     conv_id = row.id
 
     def chunks():

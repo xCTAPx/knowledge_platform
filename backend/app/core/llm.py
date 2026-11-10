@@ -31,20 +31,21 @@ def _post(payload: dict, timeout: int = 120) -> HTTPResponse:
         raise HTTPException(502, "Could not reach the LLM") from err
 
 
-def stream(prompt: str) -> Iterator[bytes]:
-    res = _post(
-        {
-            "model": settings.llm_model,
-            "stream": True,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "Answer using only the user's library excerpts. If they are not enough, say so.",
-                },
-                {"role": "user", "content": prompt},
-            ],
-        }
-    )
+def stream(prompt: str, max_tokens: int | None = None) -> Iterator[bytes]:
+    payload = {
+        "model": settings.llm_model,
+        "stream": True,
+        "messages": [
+            {
+                "role": "system",
+                "content": "Answer using only the user's library excerpts. If they are not enough, say so.",
+            },
+            {"role": "user", "content": prompt},
+        ],
+    }
+    if max_tokens is not None:
+        payload["max_tokens"] = max_tokens
+    res = _post(payload)
 
     def chunks() -> Iterator[bytes]:
         with res:

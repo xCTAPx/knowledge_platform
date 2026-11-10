@@ -16,3 +16,6 @@ pypdf
 --extra-index-url https://download.pytorch.org/whl/cu128
 torch==2.11.0+cu128
 FlagEmbedding
+ragas==0.4.3
+langchain-openai==0.3.33
+langchain-community==0.3.27
