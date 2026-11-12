@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 from pydantic import BaseModel, ConfigDict
@@ -7,9 +8,10 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.paging import Page, page_limit, sliced
 from app.core.database import get_db
+from app.core.indexing import queue_file
 from app.core.security import require_auth
 from app.core.uploads import file_response, store_upload, unlink
-from app.core.vectors import conceal, drop_file, index_file, reveal
+from app.core.vectors import conceal, drop_file, reveal
 from app.models.file import File
 from app.models.user import User
 
@@ -21,6 +23,7 @@ class FileOut(BaseModel):
     id: int
     name: str
     created_at: datetime
+    index_status: Literal["pending", "ready", "failed"]
 
 
 def _owned_file(file_id: int, user: User, db: Session) -> File:
@@ -52,7 +55,7 @@ def add_file(file: UploadFile, user: User = Depends(require_auth), db: Session =
     db.add(row)
     db.commit()
     db.refresh(row)
-    index_file(row)
+    queue_file(row, db)
     return row
 
 

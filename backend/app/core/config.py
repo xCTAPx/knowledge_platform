@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     embed_model: str = "BAAI/bge-m3"
     rerank_model: str = "BAAI/bge-reranker-v2-m3"
     qdrant_url: str = "http://localhost:6333"
+    redis_url: str = "redis://localhost:6379/0"
 
 
 settings = Settings()

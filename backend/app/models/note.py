@@ -16,6 +16,8 @@ class Note(Base):
     title: Mapped[str] = mapped_column(String(255))
     content: Mapped[str] = mapped_column(Text, default="")
     tags: Mapped[list[str]] = mapped_column(ARRAY(String(50)), default=list)
+    index_status: Mapped[str] = mapped_column(String(16), default="pending", server_default="pending")
+    index_gen: Mapped[int] = mapped_column(default=0, server_default="0")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), default=func.now())
     files: Mapped[list[File]] = relationship(cascade="all, delete-orphan")
 

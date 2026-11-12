@@ -5,8 +5,6 @@ from uuid import uuid4
 
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, FieldCondition, Filter, MatchValue, PayloadSchemaType, PointStruct, VectorParams
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 from app.core.chunks import file_text, split_text
 from app.core.config import settings
@@ -227,11 +225,6 @@ def nearest_chunks(query: str, user_id: int, limit: int) -> list[ChunkHit]:
     return hits
 
 
-def backfill_library(db: Session) -> None:
+def has_chunks() -> bool:
     ensure_collection()
-    if _qdrant().count(COLLECTION, exact=True).count:
-        return
-    for note in db.scalars(select(Note)).all():
-        index_note(note)
-    for item in db.scalars(select(File)).all():
-        index_file(item)
+    return _qdrant().count(COLLECTION, exact=True).count > 0

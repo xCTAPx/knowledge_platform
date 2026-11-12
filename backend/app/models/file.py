@@ -14,4 +14,5 @@ class File(Base):
     note_id: Mapped[int | None] = mapped_column(ForeignKey("notes.id", ondelete="CASCADE"), index=True, nullable=True)
     name: Mapped[str] = mapped_column(String(255))
     stored: Mapped[str] = mapped_column(String(80), unique=True)
+    index_status: Mapped[str] = mapped_column(String(16), default="pending", server_default="pending")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), default=func.now())

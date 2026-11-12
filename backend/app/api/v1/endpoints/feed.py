@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends
-from pydantic import Field
+from pydantic import BaseModel, Field
 from sqlalchemy import exists, literal, or_, select, tuple_, union_all
 from sqlalchemy.orm import Session, selectinload
 
@@ -27,6 +27,25 @@ class FeedFile(FileOut):
 
 
 FeedItem = Annotated[FeedNote | FeedFile, Field(discriminator="kind")]
+
+
+class IndexState(BaseModel):
+    kind: Literal["note", "file"]
+    id: int
+    index_status: Literal["pending", "failed"]
+
+
+@router.get("/feed/index-status", response_model=list[IndexState])
+def index_status(user: User = Depends(require_auth), db: Session = Depends(get_db)):
+    rows = [
+        IndexState(kind="note", id=note.id, index_status=note.index_status)
+        for note in db.scalars(select(Note).where(Note.user_id == user.id, Note.index_status != "ready"))
+    ]
+    rows.extend(
+        IndexState(kind="file", id=item.id, index_status=item.index_status)
+        for item in db.scalars(select(File).where(File.user_id == user.id, File.index_status != "ready"))
+    )
+    return rows
 
 
 @router.get("/feed", response_model=Page[FeedItem])

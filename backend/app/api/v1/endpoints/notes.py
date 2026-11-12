@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 from pydantic import BaseModel, ConfigDict
@@ -8,9 +9,10 @@ from sqlalchemy.orm import Session, selectinload
 from app.api.v1.endpoints.files import FileOut
 from app.api.v1.paging import Page, page_limit, sliced
 from app.core.database import get_db
+from app.core.indexing import queue_file, queue_note
 from app.core.security import require_auth
 from app.core.uploads import file_response, store_upload, unlink
-from app.core.vectors import conceal, drop_file, drop_note, index_file, index_note, reveal
+from app.core.vectors import conceal, drop_file, drop_note, reveal
 from app.models.file import File
 from app.models.note import Note
 from app.models.user import User
@@ -31,6 +33,7 @@ class NoteOut(BaseModel):
     content: str
     tags: list[str]
     created_at: datetime
+    index_status: Literal["pending", "ready", "failed"]
     files: list[FileOut] = []
 
 
@@ -62,7 +65,7 @@ def create_note(data: NoteIn, user: User = Depends(require_auth), db: Session = 
     db.add(note)
     db.commit()
     db.refresh(note)
-    index_note(note)
+    queue_note(note, db)
     return note
 
 
@@ -72,9 +75,7 @@ def update_note(note_id: int, data: NoteIn, user: User = Depends(require_auth), 
     note.title = data.title
     note.content = data.content
     note.tags = data.tags
-    db.commit()
-    db.refresh(note)
-    index_note(note)
+    queue_note(note, db)
     return note
 
 
@@ -112,7 +113,7 @@ def add_file(note_id: int, file: UploadFile, user: User = Depends(require_auth),
     db.add(row)
     db.commit()
     db.refresh(row)
-    index_file(row)
+    queue_file(row, db)
     return row
 
 

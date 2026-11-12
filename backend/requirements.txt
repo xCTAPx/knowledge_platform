@@ -9,6 +9,7 @@ alembic
 pyjwt
 bcrypt
 qdrant-client
+rq
 rank-bm25
 langchain-text-splitters
 tiktoken

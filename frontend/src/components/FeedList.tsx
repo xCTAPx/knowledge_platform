@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { fileKind } from "../lib/files";
 import { fileUrl, noteFileUrl, type FeedItem, type Note } from "../services/api";
 import { FilePreview } from "./FilePreview";
+import { IndexStatus } from "./IndexStatus";
 import { Hit } from "./Hit";
 import { Icon } from "./Icon";
 import { StoredFiles } from "./StoredFiles";
@@ -80,6 +81,7 @@ export function FeedList({
                       </button>
                     </div>
                   </div>
+                  <IndexStatus status={item.index_status} />
                   {item.tags.length ? <p className="tags">{item.tags.map((tag) => `#${tag}`).join(" ")}</p> : null}
                   {item.content ? (
                     <p className="excerpt">
@@ -101,6 +103,7 @@ export function FeedList({
                       <h2>
                         <Hit text={item.name} q={q} />
                       </h2>
+                      <IndexStatus status={item.index_status} />
                     </div>
                     <div className="actions">
                       <button type="button" className="ghost icon-btn" aria-label="View" onClick={() => setPreview({ name: item.name, url: fileUrl(item.id) })}>

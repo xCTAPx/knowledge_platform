@@ -1,5 +1,6 @@
 import { Hit } from "./Hit";
 import { Icon } from "./Icon";
+import { IndexStatus } from "./IndexStatus";
 import "./StoredFiles.css";
 
 export function StoredFiles({
@@ -8,7 +9,7 @@ export function StoredFiles({
   onPreview,
   onAction,
 }: {
-  files: { id: number; name: string }[];
+  files: { id: number; name: string; index_status: string }[];
   q?: string;
   onPreview: (file: { id: number; name: string }) => void;
   onAction: (id: number) => void;
@@ -18,9 +19,12 @@ export function StoredFiles({
     <ul className="files">
       {files.map((file) => (
         <li key={file.id}>
-          <button type="button" className="file-name" onClick={() => onPreview(file)}>
-            <Hit text={file.name} q={q} />
-          </button>
+          <div className="file-label">
+            <button type="button" className="file-name" onClick={() => onPreview(file)}>
+              <Hit text={file.name} q={q} />
+            </button>
+            <IndexStatus status={file.index_status} />
+          </div>
           <div className="actions">
             <button type="button" className="ghost icon-btn" aria-label="View" onClick={() => onPreview(file)}>
               <Icon name="eye" />

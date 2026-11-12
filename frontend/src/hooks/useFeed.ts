@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { feedCursor } from "../lib/feed";
-import { listFeed, type FeedItem, type User } from "../services/api";
+import { applyIndexStatus, feedCursor, indexing } from "../lib/feed";
+import { listFeed, listIndexStatus, type FeedItem, type User } from "../services/api";
 
 export function useFeed(user: User | null) {
   const [items, setItems] = useState<FeedItem[]>([]);
@@ -59,6 +59,26 @@ export function useFeed(user: User | null) {
     const timer = window.setTimeout(() => setQ(query.trim()), 300);
     return () => window.clearTimeout(timer);
   }, [query]);
+
+  useEffect(() => {
+    if (!user || !items.some(indexing)) return;
+    let cancel = false;
+    const timer = window.setInterval(() => {
+      void listIndexStatus()
+        .then((rows) => {
+          if (cancel) return;
+          setItems((prev) => {
+            const next = applyIndexStatus(prev, rows);
+            return next.every((item, index) => item === prev[index]) ? prev : next;
+          });
+        })
+        .catch(() => undefined);
+    }, 2000);
+    return () => {
+      cancel = true;
+      window.clearInterval(timer);
+    };
+  }, [user, items]);
 
   useEffect(() => {
     if (!user) {

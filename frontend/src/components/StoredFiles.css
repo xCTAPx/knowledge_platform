@@ -34,7 +34,16 @@
   color: #1c1915;
 }
 
+.file-label {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .file-name {
+  max-width: 100%;
   min-width: 0;
   padding: 0;
   border: 0;

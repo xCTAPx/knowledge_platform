@@ -69,10 +69,13 @@ export const register = (nickname: string, email: string, password: string, age:
 
 export const logout = () => Api.post("/auth/logout");
 
+export type IndexStatusName = "pending" | "ready" | "failed";
+
 export type FileOut = {
   id: number;
   name: string;
   created_at: string;
+  index_status: IndexStatusName;
 };
 
 export type Note = {
@@ -81,6 +84,7 @@ export type Note = {
   content: string;
   tags: string[];
   created_at: string;
+  index_status: IndexStatusName;
   files: FileOut[];
 };
 
@@ -154,6 +158,14 @@ export const listFiles = (before_id?: number, limit = PAGE_SIZE) =>
 
 export const listFeed = (cursor?: FeedCursor, limit = PAGE_SIZE, q?: string) =>
   Api.get<Page<FeedItem>>(`/feed${qs({ limit, q: q || undefined, ...cursor })}`);
+
+export type IndexState = {
+  kind: "note" | "file";
+  id: number;
+  index_status: "pending" | "failed";
+};
+
+export const listIndexStatus = () => Api.get<IndexState[]>("/feed/index-status");
 
 export const uploadFile = (file: File, onProgress?: (pct: number) => void) => uploadForm("/files", file, onProgress);
 
