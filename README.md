@@ -55,7 +55,7 @@ API docs: http://localhost:8000/docs
 Health check: http://localhost:8000/api/v1/health  
 Qdrant dashboard: http://localhost:6333/dashboard — collection `chunks`
 
-Saving a note or uploading a file stores the row and queues indexing in Redis. The API answers immediately. The card shows Indexing… until the worker finishes, then those chunks can be found in chat. After three failed attempts the card shows Could not index. A note is queued again when you save it. Redis keeps queued jobs if the API restarts. On worker startup, an empty `chunks` collection is queued for indexing. Refresh the library to see those cards change to Indexing…. Accepted uploads are PDF, txt, and Markdown, up to 10 MB. Text is split into chunks of 600 tokens with an overlap of 80. Search returns the 5 nearest chunks of the signed-in user.
+Saving a note or uploading a file stores the row and an outbox record in one Postgres transaction. The worker copies that record to Redis and indexes it. The API answers immediately. The card shows Indexing… until the worker finishes, then those chunks can be found in chat. After three failed attempts the card shows Could not index. A note is queued again when you save it. Redis keeps queued jobs if the API restarts. On worker startup, an empty `chunks` collection is queued for indexing. Refresh the library to see those cards change to Indexing…. Accepted uploads are PDF, txt, and Markdown, up to 10 MB. Text is split into chunks of 600 tokens with an overlap of 80. Search returns the 5 nearest chunks of the signed-in user.
 
 ## Frontend
 

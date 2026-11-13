@@ -62,9 +62,6 @@ def list_notes(
 @router.post("/notes", response_model=NoteOut)
 def create_note(data: NoteIn, user: User = Depends(require_auth), db: Session = Depends(get_db)):
     note = Note(user_id=user.id, title=data.title, content=data.content, tags=data.tags, files=[])
-    db.add(note)
-    db.commit()
-    db.refresh(note)
     queue_note(note, db)
     return note
 
@@ -110,9 +107,6 @@ def add_file(note_id: int, file: UploadFile, user: User = Depends(require_auth),
     note = _owned(note_id, user, db)
     name, stored = store_upload(file)
     row = File(user_id=user.id, note_id=note.id, name=name, stored=stored)
-    db.add(row)
-    db.commit()
-    db.refresh(row)
     queue_file(row, db)
     return row
 

@@ -12,6 +12,7 @@ from app.core.database import SessionLocal
 from app.core.vectors import drop_file, drop_note, has_chunks, index_file, index_note
 from app.models.file import File
 from app.models.note import Note
+from app.models.outbox import Outbox
 
 QUEUE = "index"
 PENDING = "pending"
@@ -27,37 +28,70 @@ def _enqueue(func: Callable[..., None], *args: int) -> None:
     Queue(QUEUE, connection=Redis.from_url(settings.redis_url)).enqueue(func, *args, job_timeout=JOB_TIMEOUT)
 
 
-def _publish(row: Note | File, db: Session, func: Callable[..., None], *args: int) -> None:
-    row.index_status = PENDING
-    db.commit()
-    try:
-        _enqueue(func, *args)
-    except Exception:
-        log.exception("could not queue %s", getattr(func, "__name__", func))
-        row.index_status = FAILED
-        db.commit()
+def _stage(db: Session, kind: str, item_id: int, gen: int) -> None:
+    queued = db.scalar(select(Outbox.id).where(Outbox.kind == kind, Outbox.item_id == item_id, Outbox.gen == gen).limit(1))
+    if queued is None:
+        db.add(Outbox(kind=kind, item_id=item_id, gen=gen))
 
 
 def queue_note(note: Note, db: Session) -> None:
-    note.index_gen += 1
-    _publish(note, db, run_index_note, note.id, note.index_gen)
+    note.index_status = PENDING
+    note.index_gen = (note.index_gen or 0) + 1
+    db.add(note)
+    db.flush()
+    db.add(Outbox(kind="note", item_id=note.id, gen=note.index_gen))
+    db.commit()
+    db.refresh(note)
 
 
 def queue_file(row: File, db: Session) -> None:
-    _publish(row, db, run_index_file, row.id)
+    row.index_status = PENDING
+    db.add(row)
+    db.flush()
+    db.add(Outbox(kind="file", item_id=row.id, gen=0))
+    db.commit()
+    db.refresh(row)
+
+
+def publish_outbox(db: Session) -> None:
+    rows = db.scalars(select(Outbox).order_by(Outbox.id).limit(100)).all()
+    for row in rows:
+        if row.kind == "note":
+            _enqueue(run_index_note, row.item_id, row.gen)
+        else:
+            _enqueue(run_index_file, row.item_id)
+        db.delete(row)
+        db.commit()
+
+
+def relay() -> None:
+    while True:
+        db = SessionLocal()
+        try:
+            publish_outbox(db)
+        except Exception:
+            log.exception("outbox relay failed")
+            db.rollback()
+        finally:
+            db.close()
+        time.sleep(1)
 
 
 def resume(db: Session) -> None:
     if not has_chunks():
         for note in db.scalars(select(Note)).all():
             note.index_status = PENDING
+            _stage(db, "note", note.id, note.index_gen)
         for row in db.scalars(select(File)).all():
             row.index_status = PENDING
+            _stage(db, "file", row.id, 0)
         db.commit()
+        return
     for note in db.scalars(select(Note).where(Note.index_status == PENDING)).all():
-        _enqueue(run_index_note, note.id, note.index_gen)
+        _stage(db, "note", note.id, note.index_gen)
     for row in db.scalars(select(File).where(File.index_status == PENDING)).all():
-        _enqueue(run_index_file, row.id)
+        _stage(db, "file", row.id, 0)
+    db.commit()
 
 
 def _tries(work, fail) -> None:

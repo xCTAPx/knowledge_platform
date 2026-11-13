@@ -52,9 +52,6 @@ def list_files(
 def add_file(file: UploadFile, user: User = Depends(require_auth), db: Session = Depends(get_db)):
     name, stored = store_upload(file)
     row = File(user_id=user.id, note_id=None, name=name, stored=stored)
-    db.add(row)
-    db.commit()
-    db.refresh(row)
     queue_file(row, db)
     return row
 
