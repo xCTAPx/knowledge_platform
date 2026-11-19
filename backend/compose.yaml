@@ -20,6 +20,16 @@ services:
     volumes:
       - redis_data:/data
 
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+
 volumes:
   qdrant_storage:
   redis_data:
+  ollama:

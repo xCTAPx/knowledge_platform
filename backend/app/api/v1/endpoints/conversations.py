@@ -9,11 +9,13 @@ from sqlalchemy.orm import Session
 from app.core.database import SessionLocal, get_db
 from app.core.library import library_excerpts, library_prompt
 from app.core.llm import complete, stream
+from app.core.log import logger
 from app.core.security import require_auth
 from app.models.conversation import Conversation, ConversationMessage
 from app.models.user import User
 
 router = APIRouter()
+log = logger("chat")
 HISTORY = 20
 
 
@@ -138,6 +140,7 @@ def send_message(conversation_id: int, data: MessageIn, user: User = Depends(req
     db.add(ConversationMessage(conversation_id=row.id, role="user", text=text))
     row.updated_at = datetime.now(timezone.utc)
     db.commit()
+    log.info("ask user=%s conv=%s chars=%s", user.id, row.id, len(text))
     prior = db.scalars(
         select(ConversationMessage)
         .where(ConversationMessage.conversation_id == row.id)
@@ -157,7 +160,9 @@ def send_message(conversation_id: int, data: MessageIn, user: User = Depends(req
         finally:
             body = b"".join(acc).decode()
             if not body:
+                log.error("ask empty conv=%s", conv_id)
                 return
+            log.info("ask done conv=%s chars=%s", conv_id, len(body))
             extra = SessionLocal()
             try:
                 extra.add(ConversationMessage(conversation_id=conv_id, role="assistant", text=body))
@@ -169,6 +174,9 @@ def send_message(conversation_id: int, data: MessageIn, user: User = Depends(req
                         if titled:
                             conv.title = titled
                 extra.commit()
+            except Exception:
+                log.exception("ask save failed conv=%s", conv_id)
+                raise
             finally:
                 extra.close()
 

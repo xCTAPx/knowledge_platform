@@ -13,7 +13,7 @@ You register, keep notes and attachments in one tape, and ask questions in a sav
 - Python 3.11+
 - Node.js 18+
 - PostgreSQL
-- Docker, for Qdrant and Redis
+- Docker, for Qdrant, Redis, and the local chat model (Ollama)
 - An NVIDIA GPU. The API loads the embedder and the reranker on `cuda:0`. The indexing worker loads a second copy of the embedder
 
 ## Backend
@@ -34,6 +34,7 @@ pip install -r requirements.txt
 copy .env.example .env # if needed
 alembic upgrade head
 docker compose up -d
+docker compose exec ollama ollama pull qwen2.5:1.5b
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -49,7 +50,7 @@ In a second terminal, from `backend`, start the indexing worker. Uploads and not
 
 `copy` is the Windows command. On macOS and Linux, use `cp .env.example .env`.
 
-In `.env`, replace `YOUR_PASSWORD` with the password you chose when installing PostgreSQL. That placeholder is not a real password: login fails with `password authentication failed for user "postgres"` until `DATABASE_URL` has the real one. Also set `JWT_SECRET` and `LLM_API_KEY`.
+In `.env`, replace `YOUR_PASSWORD` with the password you chose when installing PostgreSQL. That placeholder is not a real password: login fails with `password authentication failed for user "postgres"` until `DATABASE_URL` has the real one. Also set `JWT_SECRET`. Chat calls the local Ollama model from `.env`. `LLM_API_KEY` can stay `ollama`: the server does not check it, but the API refuses an empty key. The `pull` above is only needed once.
 
 API docs: http://localhost:8000/docs  
 Health check: http://localhost:8000/api/v1/health  
