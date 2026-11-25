@@ -11,3 +11,4 @@ class Outbox(Base):
     kind: Mapped[str] = mapped_column(String(16))
     item_id: Mapped[int] = mapped_column(Integer)
     gen: Mapped[int] = mapped_column(Integer, default=0)
+    user_id: Mapped[int | None] = mapped_column(Integer, nullable=True)

@@ -7,7 +7,7 @@ from rq import Queue, SimpleWorker
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.core.embeddings import load_embedder
-from app.core.indexing import QUEUE, relay, resume
+from app.core.jobs import DROP, INDEX, relay, resume
 
 
 def main() -> None:
@@ -21,7 +21,10 @@ def main() -> None:
     threading.Thread(target=relay, daemon=True).start()
     connection = Redis.from_url(settings.redis_url)
     # SimpleWorker keeps the loaded CUDA model in this process. The default RQ worker forks.
-    SimpleWorker([Queue(QUEUE, connection=connection)], connection=connection).work()
+    SimpleWorker(
+        [Queue(DROP, connection=connection), Queue(INDEX, connection=connection)],
+        connection=connection,
+    ).work()
 
 
 if __name__ == "__main__":

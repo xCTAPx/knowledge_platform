@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -9,10 +9,10 @@ from sqlalchemy.orm import Session, selectinload
 from app.api.v1.endpoints.files import FileOut
 from app.api.v1.paging import Page, page_limit, sliced
 from app.core.database import get_db
-from app.core.indexing import queue_file, queue_note
+from app.core.jobs import queue_drop_file, queue_drop_note, queue_index_file, queue_index_note
 from app.core.security import require_auth
 from app.core.uploads import file_response, store_upload, unlink
-from app.core.vectors import conceal, drop_file, drop_note, reveal
+from app.core.vectors import conceal, reveal
 from app.models.file import File
 from app.models.note import Note
 from app.models.user import User
@@ -62,7 +62,7 @@ def list_notes(
 @router.post("/notes", response_model=NoteOut)
 def create_note(data: NoteIn, user: User = Depends(require_auth), db: Session = Depends(get_db)):
     note = Note(user_id=user.id, title=data.title, content=data.content, tags=data.tags, files=[])
-    queue_note(note, db)
+    queue_index_note(note, db)
     return note
 
 
@@ -72,17 +72,12 @@ def update_note(note_id: int, data: NoteIn, user: User = Depends(require_auth), 
     note.title = data.title
     note.content = data.content
     note.tags = data.tags
-    queue_note(note, db)
+    queue_index_note(note, db)
     return note
 
 
 @router.delete("/notes/{note_id}")
-def delete_note(
-    note_id: int,
-    background: BackgroundTasks,
-    user: User = Depends(require_auth),
-    db: Session = Depends(get_db),
-):
+def delete_note(note_id: int, user: User = Depends(require_auth), db: Session = Depends(get_db)):
     note = _owned(note_id, user, db)
     file_ids: list[int] = []
     conceal(user.id, "note", note_id)
@@ -93,13 +88,13 @@ def delete_note(
             unlink(item.stored)
             db.delete(item)
         db.delete(note)
+        queue_drop_note(user.id, note_id, file_ids, db)
         db.commit()
     except Exception:
         reveal(user.id, "note", note_id)
         for file_id in file_ids:
             reveal(user.id, "file", file_id)
         raise
-    background.add_task(drop_note, user.id, note_id, file_ids)
 
 
 @router.post("/notes/{note_id}/files", response_model=FileOut)
@@ -107,7 +102,7 @@ def add_file(note_id: int, file: UploadFile, user: User = Depends(require_auth),
     note = _owned(note_id, user, db)
     name, stored = store_upload(file)
     row = File(user_id=user.id, note_id=note.id, name=name, stored=stored)
-    queue_file(row, db)
+    queue_index_file(row, db)
     return row
 
 
@@ -121,13 +116,7 @@ def get_file(note_id: int, file_id: int, user: User = Depends(require_auth), db:
 
 
 @router.delete("/notes/{note_id}/files/{file_id}")
-def delete_file(
-    note_id: int,
-    file_id: int,
-    background: BackgroundTasks,
-    user: User = Depends(require_auth),
-    db: Session = Depends(get_db),
-):
+def delete_file(note_id: int, file_id: int, user: User = Depends(require_auth), db: Session = Depends(get_db)):
     note = _owned(note_id, user, db)
     row = db.get(File, file_id)
     if not row or row.note_id != note.id:
@@ -137,8 +126,8 @@ def delete_file(
     try:
         unlink(row.stored)
         db.delete(row)
+        queue_drop_file(user.id, target, db)
         db.commit()
     except Exception:
         reveal(user.id, "file", target)
         raise
-    background.add_task(drop_file, user.id, target)

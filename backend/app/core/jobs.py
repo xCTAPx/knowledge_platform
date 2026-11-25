@@ -14,7 +14,8 @@ from app.models.file import File
 from app.models.note import Note
 from app.models.outbox import Outbox
 
-QUEUE = "index"
+INDEX = "index"
+DROP = "drop"
 PENDING = "pending"
 READY = "ready"
 FAILED = "failed"
@@ -24,8 +25,8 @@ JOB_TIMEOUT = 900
 log = logging.getLogger(__name__)
 
 
-def _enqueue(func: Callable[..., None], *args: int) -> None:
-    Queue(QUEUE, connection=Redis.from_url(settings.redis_url)).enqueue(func, *args, job_timeout=JOB_TIMEOUT)
+def _enqueue(queue: str, func: Callable[..., None], *args: int) -> None:
+    Queue(queue, connection=Redis.from_url(settings.redis_url)).enqueue(func, *args, job_timeout=JOB_TIMEOUT)
 
 
 def _stage(db: Session, kind: str, item_id: int, gen: int) -> None:
@@ -34,7 +35,7 @@ def _stage(db: Session, kind: str, item_id: int, gen: int) -> None:
         db.add(Outbox(kind=kind, item_id=item_id, gen=gen))
 
 
-def queue_note(note: Note, db: Session) -> None:
+def queue_index_note(note: Note, db: Session) -> None:
     note.index_status = PENDING
     note.index_gen = (note.index_gen or 0) + 1
     db.add(note)
@@ -44,7 +45,7 @@ def queue_note(note: Note, db: Session) -> None:
     db.refresh(note)
 
 
-def queue_file(row: File, db: Session) -> None:
+def queue_index_file(row: File, db: Session) -> None:
     row.index_status = PENDING
     db.add(row)
     db.flush()
@@ -53,13 +54,35 @@ def queue_file(row: File, db: Session) -> None:
     db.refresh(row)
 
 
+def queue_drop_note(user_id: int, note_id: int, file_ids: list[int], db: Session) -> None:
+    for file_id in file_ids:
+        db.add(Outbox(kind="drop_file", item_id=file_id, gen=0, user_id=user_id))
+    db.add(Outbox(kind="drop_note", item_id=note_id, gen=0, user_id=user_id))
+
+
+def queue_drop_file(user_id: int, file_id: int, db: Session) -> None:
+    db.add(Outbox(kind="drop_file", item_id=file_id, gen=0, user_id=user_id))
+
+
+def _publish(row: Outbox) -> None:
+    if row.kind == "note":
+        _enqueue(INDEX, run_index_note, row.item_id, row.gen)
+    elif row.kind == "file":
+        _enqueue(INDEX, run_index_file, row.item_id)
+    elif row.user_id is None:
+        log.error("drop outbox %s missing user_id", row.id)
+    elif row.kind == "drop_note":
+        _enqueue(DROP, run_drop_note, row.user_id, row.item_id)
+    elif row.kind == "drop_file":
+        _enqueue(DROP, run_drop_file, row.user_id, row.item_id)
+    else:
+        log.error("unknown outbox kind %s", row.kind)
+
+
 def publish_outbox(db: Session) -> None:
     rows = db.scalars(select(Outbox).order_by(Outbox.id).limit(100)).all()
     for row in rows:
-        if row.kind == "note":
-            _enqueue(run_index_note, row.item_id, row.gen)
-        else:
-            _enqueue(run_index_file, row.item_id)
+        _publish(row)
         db.delete(row)
         db.commit()
 
@@ -177,3 +200,11 @@ def _fail_file(file_id: int) -> None:
 
 def run_index_file(file_id: int) -> None:
     _tries(lambda: _finish_file(file_id), lambda: _fail_file(file_id))
+
+
+def run_drop_note(user_id: int, note_id: int) -> None:
+    _tries(lambda: drop_note(user_id, note_id, []), lambda: None)
+
+
+def run_drop_file(user_id: int, file_id: int) -> None:
+    _tries(lambda: drop_file(user_id, file_id), lambda: None)

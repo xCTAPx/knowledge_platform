@@ -1,4 +1,3 @@
-import logging
 import threading
 from dataclasses import dataclass
 from uuid import uuid4
@@ -15,7 +14,6 @@ from app.models.note import Note
 
 COLLECTION = "chunks"
 DIM = 1024
-log = logging.getLogger(__name__)
 _client: QdrantClient | None = None
 _hidden: set[tuple[int, str, int]] = set()
 _hidden_lock = threading.Lock()
@@ -121,24 +119,16 @@ def index_file(item: File) -> None:
 
 
 def drop_note(user_id: int, note_id: int, file_ids: list[int]) -> None:
-    try:
-        ensure_collection()
-        _delete(user_id, "note", "note_id", note_id)
-    except Exception:
-        log.exception("failed to drop note %s from qdrant", note_id)
-    else:
-        reveal(user_id, "note", note_id)
+    ensure_collection()
+    _delete(user_id, "note", "note_id", note_id)
+    reveal(user_id, "note", note_id)
     for file_id in file_ids:
         drop_file(user_id, file_id)
 
 
 def drop_file(user_id: int, file_id: int) -> None:
-    try:
-        ensure_collection()
-        _delete(user_id, "file", "file_id", file_id)
-    except Exception:
-        log.exception("failed to drop file %s from qdrant", file_id)
-        return
+    ensure_collection()
+    _delete(user_id, "file", "file_id", file_id)
     reveal(user_id, "file", file_id)
 
 
