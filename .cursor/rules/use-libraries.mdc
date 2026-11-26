@@ -1,0 +1,23 @@
+---
+description: For any feature, use an existing library API instead of hand-rolled code
+alwaysApply: true
+---
+
+# Do not reinvent what a library already does
+
+This applies to every feature, not only retries. Parsing, dates, HTTP, validation, serialization, files, search, retries, and algorithms are the same rule.
+
+Before writing a helper, look for a function in the standard library or in a dependency this code already uses. Call that function. A hand-rolled parser, walker, client, or algorithm is the wrong implementation when a maintained one exists.
+
+Use the concrete types, fields, and methods that library documents. Do not add a generic layer that guesses shapes for libraries this call does not use.
+
+Our code keeps only the product decision: what to call, with which input, and what to do with the result. When the right tool is a new dependency, add it to the project dependency file.
+
+```python
+# bad
+def _seconds(raw: str) -> float:
+    ...  # our own parser for a standard format
+
+# good
+datetime.fromisoformat(raw)
+```

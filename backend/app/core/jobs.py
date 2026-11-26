@@ -2,6 +2,13 @@ import logging
 import time
 from collections.abc import Callable
 
+import httpx
+from qdrant_client.common.client_exceptions import ResourceExhaustedResponse
+from qdrant_client.http.exceptions import ResponseHandlingException, UnexpectedResponse
+from tenacity import RetryCallState, Retrying, retry_if_exception, stop_after_attempt, wait_exponential_jitter
+from urllib3.exceptions import InvalidHeader
+from urllib3.util.retry import Retry
+
 from redis import Redis
 from rq import Queue
 from sqlalchemy import select
@@ -20,7 +27,8 @@ PENDING = "pending"
 READY = "ready"
 FAILED = "failed"
 ATTEMPTS = 3
-PAUSE = (5, 15)
+BACKOFF = 5
+MAX_PAUSE = 120
 JOB_TIMEOUT = 900
 log = logging.getLogger(__name__)
 
@@ -117,17 +125,65 @@ def resume(db: Session) -> None:
     db.commit()
 
 
+_retry_after_header = Retry(retry_after_max=MAX_PAUSE)
+
+
+def _retry_after(exc: BaseException) -> float | None:
+    if isinstance(exc, ResourceExhaustedResponse):
+        return float(exc.retry_after_s)
+    if isinstance(exc, UnexpectedResponse):
+        raw = exc.headers.get("Retry-After")
+        if raw:
+            try:
+                return _retry_after_header.parse_retry_after(raw)
+            except InvalidHeader:
+                return None
+    return None
+
+
+def _transient(exc: BaseException) -> bool:
+    if isinstance(exc, ResourceExhaustedResponse):
+        return True
+    if isinstance(exc, UnexpectedResponse):
+        code = exc.status_code or 0
+        return code == 429 or 500 <= code <= 599
+    inner = exc.source if isinstance(exc, ResponseHandlingException) else exc
+    return isinstance(inner, (httpx.TransportError, TimeoutError, ConnectionError))
+
+
+_backoff = wait_exponential_jitter(multiplier=BACKOFF, max=MAX_PAUSE, jitter=BACKOFF)
+
+
+def _wait(retry_state: RetryCallState) -> float:
+    exc = retry_state.outcome.exception() if retry_state.outcome else None
+    hinted = _retry_after(exc) if exc is not None else None
+    if hinted is not None:
+        return min(hinted, MAX_PAUSE)
+    return _backoff(retry_state)
+
+
+def _before_sleep(retry_state: RetryCallState) -> None:
+    log.error(
+        "index attempt %s failed, retry in %.1fs",
+        retry_state.attempt_number,
+        retry_state.upcoming_sleep,
+        exc_info=retry_state.outcome.exception() if retry_state.outcome else None,
+    )
+
+
 def _tries(work, fail) -> None:
-    for attempt in range(ATTEMPTS):
-        try:
-            work()
-            return
-        except Exception:
-            log.exception("index attempt %s failed", attempt + 1)
-            if attempt + 1 == ATTEMPTS:
-                fail()
-                return
-            time.sleep(PAUSE[attempt])
+    retrying = Retrying(
+        stop=stop_after_attempt(ATTEMPTS),
+        wait=_wait,
+        retry=retry_if_exception(_transient),
+        before_sleep=_before_sleep,
+        reraise=True,
+    )
+    try:
+        retrying(work)
+    except Exception:
+        log.exception("index attempt %s failed", retrying.statistics["attempt_number"])
+        fail()
 
 
 def _finish_note(note_id: int, gen: int) -> None:

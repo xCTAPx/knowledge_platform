@@ -10,6 +10,8 @@ pyjwt
 bcrypt
 qdrant-client
 rq
+tenacity
+urllib3
 rank-bm25
 langchain-text-splitters
 tiktoken
