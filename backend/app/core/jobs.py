@@ -1,6 +1,7 @@
 import logging
 import time
 from collections.abc import Callable
+from datetime import datetime, timedelta, timezone
 
 import httpx
 from qdrant_client.common.client_exceptions import ResourceExhaustedResponse
@@ -11,7 +12,7 @@ from urllib3.util.retry import Retry
 
 from redis import Redis
 from rq import Queue
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -72,27 +73,39 @@ def queue_drop_file(user_id: int, file_id: int, db: Session) -> None:
     db.add(Outbox(kind="drop_file", item_id=file_id, gen=0, user_id=user_id))
 
 
-def _publish(row: Outbox) -> None:
+def _publish(row: Outbox) -> bool:
     if row.kind == "note":
         _enqueue(INDEX, run_index_note, row.item_id, row.gen)
     elif row.kind == "file":
         _enqueue(INDEX, run_index_file, row.item_id)
     elif row.user_id is None:
         log.error("drop outbox %s missing user_id", row.id)
+        return False
     elif row.kind == "drop_note":
         _enqueue(DROP, run_drop_note, row.user_id, row.item_id)
     elif row.kind == "drop_file":
         _enqueue(DROP, run_drop_file, row.user_id, row.item_id)
     else:
         log.error("unknown outbox kind %s", row.kind)
+        return False
+    return True
 
 
 def publish_outbox(db: Session) -> None:
-    rows = db.scalars(select(Outbox).order_by(Outbox.id).limit(100)).all()
+    stale = datetime.now(timezone.utc) - timedelta(seconds=JOB_TIMEOUT)
+    due = or_(Outbox.published_at.is_(None), Outbox.published_at < stale)
+    rows = db.scalars(select(Outbox).where(due).order_by(Outbox.id).limit(100)).all()
     for row in rows:
-        _publish(row)
-        db.delete(row)
+        if _publish(row):
+            row.published_at = datetime.now(timezone.utc)
+        else:
+            db.delete(row)
         db.commit()
+
+
+def _done(db: Session, kind: str, item_id: int, gen: int) -> None:
+    for row in db.scalars(select(Outbox).where(Outbox.kind == kind, Outbox.item_id == item_id, Outbox.gen == gen)).all():
+        db.delete(row)
 
 
 def relay() -> None:
@@ -141,12 +154,18 @@ def _retry_after(exc: BaseException) -> float | None:
     return None
 
 
+TEMPORARY_SERVER = {
+    httpx.codes.BAD_GATEWAY,
+    httpx.codes.SERVICE_UNAVAILABLE,
+    httpx.codes.GATEWAY_TIMEOUT,
+}
+
+
 def _transient(exc: BaseException) -> bool:
     if isinstance(exc, ResourceExhaustedResponse):
         return True
     if isinstance(exc, UnexpectedResponse):
-        code = exc.status_code or 0
-        return code == 429 or 500 <= code <= 599
+        return exc.status_code in TEMPORARY_SERVER or exc.status_code == httpx.codes.TOO_MANY_REQUESTS
     inner = exc.source if isinstance(exc, ResponseHandlingException) else exc
     return isinstance(inner, (httpx.TransportError, TimeoutError, ConnectionError))
 
@@ -191,6 +210,8 @@ def _finish_note(note_id: int, gen: int) -> None:
     try:
         note = db.get(Note, note_id)
         if note is None or note.index_gen != gen:
+            _done(db, "note", note_id, gen)
+            db.commit()
             return
         user_id = note.user_id
         index_note(note)
@@ -198,10 +219,15 @@ def _finish_note(note_id: int, gen: int) -> None:
         note = db.get(Note, note_id)
         if note is None:
             drop_note(user_id, note_id, [])
+            _done(db, "note", note_id, gen)
+            db.commit()
             return
         if note.index_gen != gen:
+            _done(db, "note", note_id, gen)
+            db.commit()
             return
         note.index_status = READY
+        _done(db, "note", note_id, gen)
         db.commit()
     finally:
         db.close()
@@ -211,9 +237,9 @@ def _fail_note(note_id: int, gen: int) -> None:
     db = SessionLocal()
     try:
         note = db.get(Note, note_id)
-        if note is None or note.index_gen != gen:
-            return
-        note.index_status = FAILED
+        if note is not None and note.index_gen == gen:
+            note.index_status = FAILED
+        _done(db, "note", note_id, gen)
         db.commit()
     finally:
         db.close()
@@ -228,6 +254,8 @@ def _finish_file(file_id: int) -> None:
     try:
         row = db.get(File, file_id)
         if row is None:
+            _done(db, "file", file_id, 0)
+            db.commit()
             return
         user_id = row.user_id
         index_file(row)
@@ -235,8 +263,11 @@ def _finish_file(file_id: int) -> None:
         current = db.get(File, file_id)
         if current is None:
             drop_file(user_id, file_id)
+            _done(db, "file", file_id, 0)
+            db.commit()
             return
         current.index_status = READY
+        _done(db, "file", file_id, 0)
         db.commit()
     finally:
         db.close()
@@ -246,9 +277,9 @@ def _fail_file(file_id: int) -> None:
     db = SessionLocal()
     try:
         row = db.get(File, file_id)
-        if row is None:
-            return
-        row.index_status = FAILED
+        if row is not None:
+            row.index_status = FAILED
+        _done(db, "file", file_id, 0)
         db.commit()
     finally:
         db.close()
@@ -258,9 +289,19 @@ def run_index_file(file_id: int) -> None:
     _tries(lambda: _finish_file(file_id), lambda: _fail_file(file_id))
 
 
+def _drop(kind: str, item_id: int, drop) -> None:
+    drop()
+    db = SessionLocal()
+    try:
+        _done(db, kind, item_id, 0)
+        db.commit()
+    finally:
+        db.close()
+
+
 def run_drop_note(user_id: int, note_id: int) -> None:
-    _tries(lambda: drop_note(user_id, note_id, []), lambda: None)
+    _tries(lambda: _drop("drop_note", note_id, lambda: drop_note(user_id, note_id, [])), lambda: None)
 
 
 def run_drop_file(user_id: int, file_id: int) -> None:
-    _tries(lambda: drop_file(user_id, file_id), lambda: None)
+    _tries(lambda: _drop("drop_file", file_id, lambda: drop_file(user_id, file_id)), lambda: None)
